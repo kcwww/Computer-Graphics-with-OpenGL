@@ -22,3 +22,9 @@ $ ./빌드디렉터리/프로젝트이름
 ```
 
 시리즈별 README.md 에 자세한 내용을 확인하실 수 있습니다.
+
+## 시리즈일람
+
+| Seires | Description |
+|-------|-------|
+| [series01](https://github.com/kcwww/Computer-Graphics-with-OpenGL/tree/main/series01) | Computer Graphics 를 실습하기 위한 개발환경 세팅입니다. |
