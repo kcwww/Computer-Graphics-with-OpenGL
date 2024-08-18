@@ -1,0 +1,46 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/Users/chanwookim/Desktop/Computer-Graphics-with-OpenGL/series01/CMakeFiles/dep-spdlog"
+		},
+		{
+			"file" : "/Users/chanwookim/Desktop/Computer-Graphics-with-OpenGL/series01/CMakeFiles/dep-spdlog.rule"
+		},
+		{
+			"file" : "/Users/chanwookim/Desktop/Computer-Graphics-with-OpenGL/series01/CMakeFiles/dep-spdlog-complete.rule"
+		},
+		{
+			"file" : "/Users/chanwookim/Desktop/Computer-Graphics-with-OpenGL/series01/dep-spdlog-prefix/src/dep-spdlog-stamp/dep-spdlog-build.rule"
+		},
+		{
+			"file" : "/Users/chanwookim/Desktop/Computer-Graphics-with-OpenGL/series01/dep-spdlog-prefix/src/dep-spdlog-stamp/dep-spdlog-configure.rule"
+		},
+		{
+			"file" : "/Users/chanwookim/Desktop/Computer-Graphics-with-OpenGL/series01/dep-spdlog-prefix/src/dep-spdlog-stamp/dep-spdlog-download.rule"
+		},
+		{
+			"file" : "/Users/chanwookim/Desktop/Computer-Graphics-with-OpenGL/series01/dep-spdlog-prefix/src/dep-spdlog-stamp/dep-spdlog-install.rule"
+		},
+		{
+			"file" : "/Users/chanwookim/Desktop/Computer-Graphics-with-OpenGL/series01/dep-spdlog-prefix/src/dep-spdlog-stamp/dep-spdlog-mkdir.rule"
+		},
+		{
+			"file" : "/Users/chanwookim/Desktop/Computer-Graphics-with-OpenGL/series01/dep-spdlog-prefix/src/dep-spdlog-stamp/dep-spdlog-patch.rule"
+		},
+		{
+			"file" : "/Users/chanwookim/Desktop/Computer-Graphics-with-OpenGL/series01/dep-spdlog-prefix/src/dep-spdlog-stamp/dep-spdlog-test.rule"
+		},
+		{
+			"file" : "/Users/chanwookim/Desktop/Computer-Graphics-with-OpenGL/series01/dep-spdlog-prefix/src/dep-spdlog-stamp/dep-spdlog-update.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"dep-spdlog"
+		],
+		"name" : "dep-spdlog"
+	}
+}

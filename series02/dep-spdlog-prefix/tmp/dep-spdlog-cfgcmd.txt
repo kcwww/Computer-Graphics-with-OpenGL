@@ -1,0 +1,1 @@
+cmd='/opt/homebrew/Cellar/cmake/3.30.2/bin/cmake;-DCMAKE_INSTALL_PREFIX=/Users/chanwookim/Desktop/Computer-Graphics-with-OpenGL/series01/install;-GUnix Makefiles;-S;<SOURCE_DIR><SOURCE_SUBDIR>;-B;<BINARY_DIR>'
