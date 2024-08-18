@@ -1,0 +1,14 @@
+# Target labels
+ dep-spdlog
+# Source files and their labels
+/Users/chanwookim/Desktop/Computer-Graphics-with-OpenGL/series01/CMakeFiles/dep-spdlog
+/Users/chanwookim/Desktop/Computer-Graphics-with-OpenGL/series01/CMakeFiles/dep-spdlog.rule
+/Users/chanwookim/Desktop/Computer-Graphics-with-OpenGL/series01/CMakeFiles/dep-spdlog-complete.rule
+/Users/chanwookim/Desktop/Computer-Graphics-with-OpenGL/series01/dep-spdlog-prefix/src/dep-spdlog-stamp/dep-spdlog-build.rule
+/Users/chanwookim/Desktop/Computer-Graphics-with-OpenGL/series01/dep-spdlog-prefix/src/dep-spdlog-stamp/dep-spdlog-configure.rule
+/Users/chanwookim/Desktop/Computer-Graphics-with-OpenGL/series01/dep-spdlog-prefix/src/dep-spdlog-stamp/dep-spdlog-download.rule
+/Users/chanwookim/Desktop/Computer-Graphics-with-OpenGL/series01/dep-spdlog-prefix/src/dep-spdlog-stamp/dep-spdlog-install.rule
+/Users/chanwookim/Desktop/Computer-Graphics-with-OpenGL/series01/dep-spdlog-prefix/src/dep-spdlog-stamp/dep-spdlog-mkdir.rule
+/Users/chanwookim/Desktop/Computer-Graphics-with-OpenGL/series01/dep-spdlog-prefix/src/dep-spdlog-stamp/dep-spdlog-patch.rule
+/Users/chanwookim/Desktop/Computer-Graphics-with-OpenGL/series01/dep-spdlog-prefix/src/dep-spdlog-stamp/dep-spdlog-test.rule
+/Users/chanwookim/Desktop/Computer-Graphics-with-OpenGL/series01/dep-spdlog-prefix/src/dep-spdlog-stamp/dep-spdlog-update.rule
