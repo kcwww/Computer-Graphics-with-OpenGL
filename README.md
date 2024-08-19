@@ -28,3 +28,4 @@ $ ./빌드디렉터리/프로젝트이름
 | Seires | Description |
 |-------|-------|
 | [series01](https://github.com/kcwww/Computer-Graphics-with-OpenGL/tree/main/series01) | Computer Graphics 를 실습하기 위한 개발환경 세팅입니다. |
+| [series02](https://www.chanwooyam.dev/series/computer-graphics/2IYzBkIto4h4tlnClmzU) | OpenGL 을 활용한 GLFW 기초 예제입니다. |
