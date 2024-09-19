@@ -48,6 +48,12 @@ bool Context::Init() {
     return false;
   }
   SPDLOG_INFO("program : {}", m_program->Get());
+
+  auto loc = glGetUniformLocation(m_program->Get(), "color"); // 프로그램에서 uniform 변수의 위치를 가져옴
+  m_program->Use(); // 사용할 프로그램을 지정
+  glUniform4f(loc, 1.0f, 1.0f, 0.0f, 1.0f); // uniform 변수에 값을 전달
+
+
   glClearColor(0.1f, 0.2f, 0.3f, 0.0f); //화면을 지울 때 사용할 배경색을 설정 RGB 투명도
   return true;
 }
