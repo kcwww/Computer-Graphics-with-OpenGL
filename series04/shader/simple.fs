@@ -1,6 +1,9 @@
-#version 330 core // version of GLSL
-out vec4 fragColor; // output color
+// fragment shader
+#version 330 core
+
+in vec4 vertexColor; // vertex shader 로부터 입력된 변수 (같은 변수명, 같은 타입)
+out vec4 FragColor; // 최종 출력 색상
 
 void main() {
-    fragColor = vec4(1.0, 0.0, 0.0, 1.0); // red color
+  FragColor = vertexColor;
 }
