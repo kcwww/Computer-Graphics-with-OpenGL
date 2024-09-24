@@ -1,5 +1,4 @@
 #include "context.h"
-#include "image.h"
 
 ContextUPtr Context::Create() {
   auto context = ContextUPtr(new Context());
@@ -53,18 +52,30 @@ bool Context::Init() {
 
   glClearColor(0.1f, 0.2f, 0.3f, 0.0f); //화면을 지울 때 사용할 배경색을 설정 RGB 투명도
   
+
   auto image = Image::Load("./image/container.jpg");
+  // auto image = Image::Create(512,512);
+  // image->SetCheckImage(16, 16);
+  
   if (!image) return false;
   SPDLOG_INFO("Image size: {} x {}, {} channels", image->GetWidth(), image->GetHeight(), image->GetChannelCount());
+  m_texture = Texture::CreateFromImage(image.get());
   
-  glGenTextures(1, &m_texture); // 텍스처 생성
-  glBindTexture(GL_TEXTURE_2D, m_texture); // 텍스처 바인딩
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); // 텍스처 필터 설정
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); // 텍스처 랩 설정
+  
+  auto image2 = Image::Load("./image/awesomeface.png");
+  m_texture2 = Texture::CreateFromImage(image2.get());
 
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image->GetWidth(), image->GetHeight(), 0, GL_RGB, GL_UNSIGNED_BYTE, image->GetData()); // 텍스처 데이터 설정
+  // 텍스처 바인딩 및 설정 슬롯 0, 1
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, m_texture->Get());
+  glActiveTexture(GL_TEXTURE1);
+  glBindTexture(GL_TEXTURE_2D, m_texture2->Get());
+
+  // 프로그램에 텍스처 유니폼 설정
+  m_program->Use();
+  glUniform1i(glGetUniformLocation(m_program->Get(), "tex"), 0);
+  glUniform1i(glGetUniformLocation(m_program->Get(), "tex2"), 1);
+  
   return true;
 }
 
