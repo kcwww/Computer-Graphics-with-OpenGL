@@ -74,7 +74,7 @@ bool Context::Init() {
   // 버텍스 속성 설정
   m_vertexLayout->SetAttrib(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), 0);
   // m_vertexLayout->SetAttrib(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), 3 * sizeof(float));
-  m_vertexLayout->SetAttrib(2, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), 3 * sizeof(float));
+  m_vertexLayout->SetAttrib(2, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), 3 * sizeof(float));
 
   // 인덱스 버퍼 생성
   m_elementBuffer = Buffer::CraeteWithData(GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW, indices, sizeof(indices));
