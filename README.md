@@ -32,4 +32,4 @@ $ ./빌드디렉터리/프로젝트이름
 | [series03](https://github.com/kcwww/Computer-Graphics-with-OpenGL/tree/main/series03) | OpenGL 그래픽스 파이프라인 구축하기                     |
 | [series04](https://github.com/kcwww/Computer-Graphics-with-OpenGL/tree/main/series04) | shader 로 삼각형 그리기 (with. GLSL)                    |
 | [series05](https://github.com/kcwww/Computer-Graphics-with-OpenGL/tree/main/series05) | Texture in OpenGL      |
-| [series05](https://github.com/kcwww/Computer-Graphics-with-OpenGL/tree/main/series06) | 선형 변환을 이용한 큐브 그리기 (with. GLM)   |
+| [series06](https://github.com/kcwww/Computer-Graphics-with-OpenGL/tree/main/series06) | 선형 변환을 이용한 큐브 그리기 (with. GLM)   |
