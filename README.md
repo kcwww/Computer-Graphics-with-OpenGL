@@ -33,3 +33,4 @@ $ ./빌드디렉터리/프로젝트이름
 | [series04](https://github.com/kcwww/Computer-Graphics-with-OpenGL/tree/main/series04) | shader 로 삼각형 그리기 (with. GLSL)                    |
 | [series05](https://github.com/kcwww/Computer-Graphics-with-OpenGL/tree/main/series05) | Texture in OpenGL      |
 | [series06](https://github.com/kcwww/Computer-Graphics-with-OpenGL/tree/main/series06) | 선형 변환을 이용한 큐브 그리기 (with. GLM)   |
+| [series07](https://github.com/kcwww/Computer-Graphics-with-OpenGL/tree/main/series07) | 카메라 조작하기 |
