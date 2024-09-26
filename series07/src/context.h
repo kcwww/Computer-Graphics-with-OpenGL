@@ -13,6 +13,16 @@ class Context {
   public:
     static ContextUPtr Create();
     void Render();
+
+    // input
+    void ProcessInput(GLFWwindow *window);
+
+    // WIDTH, HEIGHT
+    void Reshape(int width, int height);
+
+    // move mouse
+    void MoveMouse(double x, double y);
+
   private:
     Context() {};
     bool Init();
@@ -23,6 +33,21 @@ class Context {
     BufferUPtr m_elementBuffer;
     TextureUPtr m_texture;
     TextureUPtr m_texture2;
+
+    // camera parameter
+    glm::vec3 m_cameraPos {0.0f, 0.0f, 3.0f};
+    glm::vec3 m_cameraFront {0.0f, 0.0f, -1.0f};
+    glm::vec3 m_cameraUp {0.0f, 1.0f, 0.0f};
+
+    // mouse
+    float m_cameraPitch {0.0f};
+    float m_cameraYaw {0.0f};
+
+    // size
+    int m_width {WINDOW_WIDTH};
+    int m_height {WINDOW_HEIGHT};
+
+    
 };
 
 #endif

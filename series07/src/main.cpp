@@ -3,7 +3,16 @@
 void OnFrameBufferSizeChange(GLFWwindow* window, int width, int height) {
     SPDLOG_INFO("Frame Buffer Size Changed : {} x {}", width, height);
     // glViewport 함수를 통해 OpenGL의 렌더링 영역을 설정
-    glViewport(0, 0, width, height);
+    // glViewport(0, 0, width, height);
+
+    // reshape
+    auto context = reinterpret_cast<Context*>(glfwGetWindowUserPointer(window));
+    context->Reshape(width, height);
+}
+
+void OnCursorPos(GLFWwindow* window, double x, double y) {
+    auto context = reinterpret_cast<Context*>(glfwGetWindowUserPointer(window));
+    context->MoveMouse(x, y);
 }
 
 void OnKeyEvent(GLFWwindow *window, int key, int scancode, int action, int mods) {
@@ -66,14 +75,21 @@ int main() {
         return -1;
     }
 
+    // user pointer 설정
+    glfwSetWindowUserPointer(window, context.get());
 
     // 프레임 버퍼 사이즈 변경 콜백 함수 등록
     glfwSetFramebufferSizeCallback(window, OnFrameBufferSizeChange);
     glfwSetKeyCallback(window, OnKeyEvent);
+
+    // mouse callback
+    glfwSetCursorPosCallback(window, OnCursorPos);
+
     // glfw 루프
     SPDLOG_INFO("Start GLFW Loop");
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
+        context->ProcessInput(window); // 입력 처리 함수
         context->Render();
         glfwSwapBuffers(window); // 이전 버퍼와 다음 버퍼를 교체
     }
