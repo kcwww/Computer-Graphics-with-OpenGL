@@ -267,7 +267,6 @@ void Context::MoveMouse(double x, double y) {
   static glm::vec2 prevPos = glm::vec2((float)x, (float)y);
 
   auto pos = glm::vec2((float)x, (float)y);
-  // auto deltaPos = pos - prevPos;
   auto deltaPos = pos - m_prevMousePos;
 
   const float cameraRotSpeed = 0.08f;
@@ -280,7 +279,6 @@ void Context::MoveMouse(double x, double y) {
   if (m_cameraPitch < -89.0f) m_cameraPitch = -89.0f;
   if (m_cameraPitch > 89.0f) m_cameraPitch = 89.0f;
 
-  // prevPos = pos;
   m_prevMousePos = pos;
 }
 
@@ -291,7 +289,6 @@ void Context::MouseButton(int button, int action, double x, double y) {
       m_cameraControl = true;
     } else if (action == GLFW_RELEASE) {
       m_cameraControl = false;
-      glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     }
   }
 }
