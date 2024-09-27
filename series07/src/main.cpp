@@ -1,5 +1,17 @@
 #include "context.h"
 
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
+
+//imgui
+void OnCharEvent (GLFWwindow* window, unsigned int ch) {
+    ImGui_ImplGlfw_CharCallback(window, ch);
+}
+
+void OnScroll(GLFWwindow* window, double x, double y) {
+    ImGui_ImplGlfw_ScrollCallback(window, x, y);
+}
+
 void OnFrameBufferSizeChange(GLFWwindow* window, int width, int height) {
     SPDLOG_INFO("Frame Buffer Size Changed : {} x {}", width, height);
     // glViewport 함수를 통해 OpenGL의 렌더링 영역을 설정
@@ -16,6 +28,9 @@ void OnCursorPos(GLFWwindow* window, double x, double y) {
 }
 
 void OnMouseButton(GLFWwindow* window, int button, int action, int mods) {
+    // imgui mouse button
+    ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
+
     auto context = reinterpret_cast<Context*>(glfwGetWindowUserPointer(window));
     double x, y;
     glfwGetCursorPos(window, &x, &y);
@@ -23,6 +38,8 @@ void OnMouseButton(GLFWwindow* window, int button, int action, int mods) {
 }
 
 void OnKeyEvent(GLFWwindow *window, int key, int scancode, int action, int mods) {
+    // imgui key event
+    ImGui_ImplGlfw_KeyCallback(window, key, scancode, action, mods);
 
     SPDLOG_INFO("key : {}, scancode : {}, action : {}, mods : {}{}{}",
     key, scancode,
@@ -74,6 +91,14 @@ int main() {
     const char* glVersion = (const char*)glGetString(GL_VERSION);
     SPDLOG_INFO("OpenGL Version : {}", glVersion);
     
+    // imgui 초기화
+    auto imguiContext = ImGui::CreateContext();
+    ImGui::SetCurrentContext(imguiContext);
+    ImGui_ImplGlfw_InitForOpenGL(window, false); // callback 함수를 직접 호출 = false
+    ImGui_ImplOpenGL3_Init();
+    ImGui_ImplOpenGL3_CreateFontsTexture(); // font texture 생성
+    ImGui_ImplOpenGL3_CreateDeviceObjects(); // device object 생성
+
     // Context 생성
     auto context = Context::Create();
     if (!context) {
@@ -92,16 +117,38 @@ int main() {
     // mouse callback
     glfwSetCursorPosCallback(window, OnCursorPos);
     glfwSetMouseButtonCallback(window, OnMouseButton);
-    
+    // imgui mouse scroll
+    glfwSetScrollCallback(window, OnScroll);
+    // imgui char event
+    glfwSetCharCallback(window, OnCharEvent);
+
     // glfw 루프
     SPDLOG_INFO("Start GLFW Loop");
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
+
+        // imgui new frame
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+
         context->ProcessInput(window); // 입력 처리 함수
         context->Render();
+
+        // imgui render
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
         glfwSwapBuffers(window); // 이전 버퍼와 다음 버퍼를 교체
     }
     context.reset();
+
+    // imgui 종료
+    ImGui_ImplOpenGL3_DestroyDeviceObjects();
+    ImGui_ImplOpenGL3_DestroyFontsTexture();
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext(imguiContext);
+
     glfwTerminate();
     return 0;
 }

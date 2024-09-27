@@ -24,7 +24,7 @@ include(Dependency.cmake)
 # 우리 프로젝트에 include / lib 관련 옵션 추가
 target_include_directories(${PROJECT_NAME} PUBLIC ${DEP_INCLUDE_DIR})
 target_link_directories(${PROJECT_NAME} PUBLIC ${DEP_LIB_DIR})
-# target_link_libraries(${PROJECT_NAME} PUBLIC ${DEP_LIBS})
+target_link_libraries(${PROJECT_NAME} PUBLIC ${DEP_LIBS}) # 링크할 라이브러리 추가
 
 # 필요한 macOS 프레임워크를 추가합니다.
 target_link_libraries(${PROJECT_NAME} PUBLIC ${DEP_LIBS}

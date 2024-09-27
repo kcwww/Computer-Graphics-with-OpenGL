@@ -1,4 +1,5 @@
 #include "context.h"
+#include <imgui.h>
 
 ContextUPtr Context::Create() {
   auto context = ContextUPtr(new Context());
@@ -123,6 +124,43 @@ bool Context::Init() {
 
 // multiple cube
 void Context::Render() {
+
+    // // imgui
+    // if (ImGui::Begin("ui window")) { // Create a window called "Hello, world!" and append into it.
+    //     ImGui::Text("Hello, World!");
+    // }
+    // ImGui::End(); // begin 과 end 사이에 ui를 넣어준다. pair로 사용해야함.
+
+    // imgui
+    // if (ImGui::Begin("ui window")) { // Create a window called "Hello, world!" and append into it.
+
+    //     // ImGui::SliderFloat("float", &m_clearColor.r, 0.0f, 1.0f);
+    //     if (ImGui::ColorEdit4("clear color", glm::value_ptr(m_clearColor)))
+    //       glClearColor(m_clearColor.x, m_clearColor.y, m_clearColor.z, m_clearColor.w);
+        
+    // }
+    // ImGui::End(); // begin 과 end 사이에 ui를 넣어준다. pair로 사용해야함.
+
+    if (ImGui::Begin("ui window")) { // Create a window called "Hello, world!" and append into it.
+
+        // ImGui::SliderFloat("float", &m_clearColor.r, 0.0f, 1.0f);
+        if (ImGui::ColorEdit4("clear color", glm::value_ptr(m_clearColor)))
+          glClearColor(m_clearColor.x, m_clearColor.y, m_clearColor.z, m_clearColor.w);
+        ImGui::Separator();
+        ImGui::DragFloat3("cameraPos", glm::value_ptr(m_cameraPos), 0.01f);
+        ImGui::DragFloat("cameraYaw", &m_cameraYaw, 0.5f);
+        ImGui::DragFloat("cameraPitch", &m_cameraPitch, 0.5f, -89.0f, 89.0f);
+        ImGui::Separator();
+        if (ImGui::Button("reset camera")) {
+          m_cameraYaw = 0.0f;
+          m_cameraPitch = 0.0f;
+          m_cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+        }
+    }
+    ImGui::End(); // begin 과 end 사이에 ui를 넣어준다. pair로 사용해야함.
+    
+
+
     std::vector<glm::vec3> cubePositions = {
         glm::vec3( 0.0f, 0.0f, 0.0f),
         glm::vec3( 2.0f, 5.0f, -15.0f),
@@ -226,7 +264,7 @@ void Context::Reshape(int width, int height) {
 void Context::MoveMouse(double x, double y) {
   if (!m_cameraControl) return;
 
-  // static glm::vec2 prevPos = glm::vec2((float)x, (float)y);
+  static glm::vec2 prevPos = glm::vec2((float)x, (float)y);
 
   auto pos = glm::vec2((float)x, (float)y);
   // auto deltaPos = pos - prevPos;
