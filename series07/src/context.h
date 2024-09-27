@@ -22,6 +22,7 @@ class Context {
 
     // move mouse
     void MoveMouse(double x, double y);
+    void MouseButton(int button, int action, double x, double y); 
 
   private:
     Context() {};
@@ -35,6 +36,8 @@ class Context {
     TextureUPtr m_texture2;
 
     // camera parameter
+    bool m_cameraControl { false };
+    glm:: vec2 m_prevMousePos { glm::vec2(0.0f) };
     glm::vec3 m_cameraPos {0.0f, 0.0f, 3.0f};
     glm::vec3 m_cameraFront {0.0f, 0.0f, -1.0f};
     glm::vec3 m_cameraUp {0.0f, 1.0f, 0.0f};

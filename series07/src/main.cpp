@@ -15,6 +15,13 @@ void OnCursorPos(GLFWwindow* window, double x, double y) {
     context->MoveMouse(x, y);
 }
 
+void OnMouseButton(GLFWwindow* window, int button, int action, int mods) {
+    auto context = reinterpret_cast<Context*>(glfwGetWindowUserPointer(window));
+    double x, y;
+    glfwGetCursorPos(window, &x, &y);
+    context->MouseButton(button, action, x, y);
+}
+
 void OnKeyEvent(GLFWwindow *window, int key, int scancode, int action, int mods) {
 
     SPDLOG_INFO("key : {}, scancode : {}, action : {}, mods : {}{}{}",
@@ -84,7 +91,8 @@ int main() {
 
     // mouse callback
     glfwSetCursorPosCallback(window, OnCursorPos);
-
+    glfwSetMouseButtonCallback(window, OnMouseButton);
+    
     // glfw 루프
     SPDLOG_INFO("Start GLFW Loop");
     while (!glfwWindowShouldClose(window)) {

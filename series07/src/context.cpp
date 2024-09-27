@@ -195,6 +195,8 @@ void Context::Render() {
 }
 
 void Context::ProcessInput(GLFWwindow *window) {
+  if (!m_cameraControl) return;
+
   const float cameraSpeed = 0.05f;
   if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
     m_cameraPos += cameraSpeed * m_cameraFront;
@@ -222,9 +224,13 @@ void Context::Reshape(int width, int height) {
 }
 
 void Context::MoveMouse(double x, double y) {
-  static glm::vec2 prevPos = glm::vec2((float)x, (float)y);
+  if (!m_cameraControl) return;
+
+  // static glm::vec2 prevPos = glm::vec2((float)x, (float)y);
+
   auto pos = glm::vec2((float)x, (float)y);
-  auto deltaPos = pos - prevPos;
+  // auto deltaPos = pos - prevPos;
+  auto deltaPos = pos - m_prevMousePos;
 
   const float cameraRotSpeed = 0.08f;
   m_cameraYaw -= deltaPos.x * cameraRotSpeed;
@@ -236,5 +242,18 @@ void Context::MoveMouse(double x, double y) {
   if (m_cameraPitch < -89.0f) m_cameraPitch = -89.0f;
   if (m_cameraPitch > 89.0f) m_cameraPitch = 89.0f;
 
-  prevPos = pos;
+  // prevPos = pos;
+  m_prevMousePos = pos;
+}
+
+void Context::MouseButton(int button, int action, double x, double y) {
+  if (button == GLFW_MOUSE_BUTTON_RIGHT) {
+    if (action == GLFW_PRESS) {
+      m_prevMousePos = glm::vec2((float)x, (float)y);
+      m_cameraControl = true;
+    } else if (action == GLFW_RELEASE) {
+      m_cameraControl = false;
+      glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    }
+  }
 }
