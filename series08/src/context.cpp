@@ -66,27 +66,34 @@ bool Context::Init() {
   // 인덱스 버퍼 생성
   m_elementBuffer = Buffer::CraeteWithData(GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW, indices, sizeof(indices));
   
-  // Shader 생성
-  ShaderPtr vertexShader = Shader::CreateFromFile("./shader/lighting.vs", GL_VERTEX_SHADER);
-  ShaderPtr fragmentShader = Shader::CreateFromFile("./shader/lighting.fs", GL_FRAGMENT_SHADER);
-  SPDLOG_INFO("vertexShader : {}", vertexShader->Get());
-  SPDLOG_INFO("fragmentShader : {}", fragmentShader->Get());
-  if (!vertexShader || !fragmentShader) {
+  // // Shader 생성
+  // ShaderPtr vertexShader = Shader::CreateFromFile("./shader/lighting.vs", GL_VERTEX_SHADER);
+  // ShaderPtr fragmentShader = Shader::CreateFromFile("./shader/lighting.fs", GL_FRAGMENT_SHADER);
+  // SPDLOG_INFO("vertexShader : {}", vertexShader->Get());
+  // SPDLOG_INFO("fragmentShader : {}", fragmentShader->Get());
+  // if (!vertexShader || !fragmentShader) {
+  //   return false;
+  // }
+  // // Program 생성
+  // m_program = Program::Create({vertexShader, fragmentShader});
+  // if (!m_program) {
+  //   return false;
+  // }
+  // SPDLOG_INFO("program : {}", m_program->Get());
+
+  m_simpleProgram = Program::Create("./shader/simple.vs", "./shader/simple.fs");
+  if (!m_simpleProgram)
     return false;
-  }
-  // Program 생성
-  m_program = Program::Create({vertexShader, fragmentShader});
-  if (!m_program) {
+  
+  m_program = Program::Create("./shader/lighting.vs", "./shader/lighting.fs");
+  if (!m_program)
     return false;
-  }
-  SPDLOG_INFO("program : {}", m_program->Get());
+  
 
   glClearColor(0.1f, 0.2f, 0.3f, 0.0f); //화면을 지울 때 사용할 배경색을 설정 RGB 투명도
   
 
   auto image = Image::Load("./image/container.jpg");
-  
-  
   if (!image) return false;
   SPDLOG_INFO("Image size: {} x {}, {} channels", image->GetWidth(), image->GetHeight(), image->GetChannelCount());
   m_texture = Texture::CreateFromImage(image.get());
@@ -95,29 +102,10 @@ bool Context::Init() {
   auto image2 = Image::Load("./image/awesomeface.png");
   m_texture2 = Texture::CreateFromImage(image2.get());
 
-  // 텍스처 바인딩 및 설정 슬롯 0, 1
-  glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, m_texture->Get());
-  glActiveTexture(GL_TEXTURE1);
-  glBindTexture(GL_TEXTURE_2D, m_texture2->Get());
+  m_material.diffuse = Texture::CreateFromImage(Image::Load("./image/container2.png").get());
 
-  // 프로그램에 텍스처 유니폼 설정
-  m_program->Use();
-  m_program->SetUniform("tex", 0);
-  m_program->SetUniform("tex2", 1);
-  // pos
-  
-
-
-  // x 축으로 -55 도 회전
-  auto model = glm::rotate(glm::mat4(1.0f), glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-  // 카메라는 원점으로부터 z 축 방향으로 -3 만큼 떨어짐
-  auto view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.0f));  
-  // 종횡비 4:3, 세로 화각 45도의 원근 투영
-  auto projection = glm::perspective(glm::radians(45.0f), (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT, 0.01f, 10.0f);
-  auto transform = projection * view * model;
-
-  m_program->SetUniform("transform", transform);
+  // use texture specular
+  m_material.specular = Texture::CreateFromImage(Image::Load("./image/container2_specular.png").get());
 
   return true;
 }
@@ -126,17 +114,37 @@ bool Context::Init() {
 
 void Context::Render() {
 
+    // // light parameter
+    // if (ImGui::Begin("ui window")) {
+    //     if (ImGui::CollapsingHeader("light", ImGuiTreeNodeFlags_DefaultOpen)) {
+    //       ImGui::DragFloat3("light pos", glm::value_ptr(m_lightPos), 0.01f);
+    //       ImGui::ColorEdit3("light color", glm::value_ptr(m_lightColor));
+    //       ImGui::ColorEdit3("object color", glm::value_ptr(m_objectColor));
+    //       ImGui::SliderFloat("ambient strength", &m_ambientStrength, 0.0f, 1.0f);
+    //       ImGui::SliderFloat("specular strength", &m_specularStrength, 0.0f, 1.0f);
+    //       ImGui::DragFloat("shininess", &m_specularShininess, 1.0f, 1.0f, 256.0f);
+    //     }
+    //     // animation
+    //     ImGui::Checkbox("animation", &m_animation);
+    // }
+    // ImGui::End();
+
+
     // light parameter
     if (ImGui::Begin("ui window")) {
         if (ImGui::CollapsingHeader("light", ImGuiTreeNodeFlags_DefaultOpen)) {
-          ImGui::DragFloat3("light pos", glm::value_ptr(m_lightPos), 0.01f);
-          ImGui::ColorEdit3("light color", glm::value_ptr(m_lightColor));
-          ImGui::ColorEdit3("object color", glm::value_ptr(m_objectColor));
-          ImGui::SliderFloat("ambient strength", &m_ambientStrength, 0.0f, 1.0f);
-          ImGui::SliderFloat("specular strength", &m_specularStrength, 0.0f, 1.0f);
-          ImGui::DragFloat("shininess", &m_specularShininess, 1.0f, 1.0f, 256.0f);
+          ImGui::DragFloat3("light pos", glm::value_ptr(m_light.position), 0.01f);
+          ImGui::ColorEdit3("light ambient", glm::value_ptr(m_light.ambient));
+          ImGui::ColorEdit3("light diffuse", glm::value_ptr(m_light.diffuse));
+          ImGui::ColorEdit3("light specular", glm::value_ptr(m_light.specular));
         }
         // animation
+        if (ImGui::CollapsingHeader("material", ImGuiTreeNodeFlags_DefaultOpen)) {
+          // ImGui::ColorEdit3("material ambient", glm::value_ptr(m_material.ambient));
+          // ImGui::ColorEdit3("material diffuse", glm::value_ptr(m_material.diffuse));
+          // ImGui::ColorEdit3("material specular", glm::value_ptr(m_material.specular));
+          ImGui::DragFloat("shininess", &m_material.shininess, 1.0f, 1.0f, 256.0f);
+        }
         ImGui::Checkbox("animation", &m_animation);
     }
     ImGui::End();
@@ -169,31 +177,76 @@ void Context::Render() {
     auto view = glm::lookAt(m_cameraPos, m_cameraPos + m_cameraFront, m_cameraUp);
 
 
-    // light model transform
+    // // light model transform
+    // auto lightModelTransform =
+    //   glm::translate(glm::mat4(1.0), m_lightPos) *
+    //   glm::scale(glm::mat4(1.0), glm::vec3(0.1f));
+    // m_program->Use();
+    // m_program->SetUniform("lightPos", m_lightPos);
+    // m_program->SetUniform("lightColor", glm::vec3(1.0f));
+    // m_program->SetUniform("objectColor", glm::vec3(1.0f));
+    // m_program->SetUniform("ambientStrength", 1.0f);
+    // m_program->SetUniform("transform", projection * view * lightModelTransform);
+    // m_program->SetUniform("modelTransform", lightModelTransform);
+    // glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+
+    // // progrma 사용
+    // m_program->Use();
+    // m_program->SetUniform("lightColor", m_lightColor);
+    // m_program->SetUniform("objectColor", m_objectColor);
+    // m_program->SetUniform("ambientStrength", m_ambientStrength);
+    // // lightPos
+    // m_program->SetUniform("lightPos", m_lightPos);
+    // // specular
+    // m_program->SetUniform("viewPos", m_cameraPos);
+    // m_program->SetUniform("specularStrength", m_specularStrength);
+    // m_program->SetUniform("specularShininess", m_specularShininess);
+
+
+    // use struct
     auto lightModelTransform =
-      glm::translate(glm::mat4(1.0), m_lightPos) *
+      glm::translate(glm::mat4(1.0), m_light.position) *
       glm::scale(glm::mat4(1.0), glm::vec3(0.1f));
-    m_program->Use();
-    m_program->SetUniform("lightPos", m_lightPos);
-    m_program->SetUniform("lightColor", glm::vec3(1.0f));
-    m_program->SetUniform("objectColor", glm::vec3(1.0f));
-    m_program->SetUniform("ambientStrength", 1.0f);
-    m_program->SetUniform("transform", projection * view * lightModelTransform);
-    m_program->SetUniform("modelTransform", lightModelTransform);
+
+    // m_program->Use();
+    // m_program->SetUniform("light.position", m_light.position);
+    // m_program->SetUniform("light.ambient", m_light.diffuse);
+    // m_program->SetUniform("material.ambient", m_light.diffuse);
+    // m_program->SetUniform("transform", projection * view * lightModelTransform);
+    // m_program->SetUniform("modelTransform", lightModelTransform);
+    // glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+
+    // simple program
+    m_simpleProgram->Use();
+    m_simpleProgram->SetUniform("color", glm::vec4(m_light.ambient + m_light.diffuse, 1.0f));
+    m_simpleProgram->SetUniform("transform", projection * view * lightModelTransform);
     glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 
     // progrma 사용
     m_program->Use();
-    m_program->SetUniform("lightColor", m_lightColor);
-    m_program->SetUniform("objectColor", m_objectColor);
-    m_program->SetUniform("ambientStrength", m_ambientStrength);
-    // lightPos
-    m_program->SetUniform("lightPos", m_lightPos);
-    // specular
     m_program->SetUniform("viewPos", m_cameraPos);
-    m_program->SetUniform("specularStrength", m_specularStrength);
-    m_program->SetUniform("specularShininess", m_specularShininess);
+    m_program->SetUniform("light.position", m_light.position);
+    m_program->SetUniform("light.ambient", m_light.ambient);
+    m_program->SetUniform("light.diffuse", m_light.diffuse);
+    m_program->SetUniform("light.specular", m_light.specular);
+    // m_program->SetUniform("material.ambient", m_material.ambient);
+    // m_program->SetUniform("material.diffuse", m_material.diffuse);
 
+    // use texture
+    m_program->SetUniform("material.diffuse", 0); // 0번째 텍스처 사용
+    // m_program->SetUniform("material.specular", m_material.specular);
+
+    // use texture both
+    m_program->SetUniform("material.specular", 1); // 1번째 텍스처 사용
+
+    m_program->SetUniform("material.shininess", m_material.shininess);
+
+
+    // use texture
+    glActiveTexture(GL_TEXTURE0);
+    m_material.diffuse->Bind();
+    glActiveTexture(GL_TEXTURE1);
+    m_material.specular->Bind();
 
 
     for (size_t i = 0; i < cubePositions.size(); i++){

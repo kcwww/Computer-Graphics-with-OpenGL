@@ -8,7 +8,13 @@ ProgramUPtr Program::Create(const std::vector<ShaderPtr>& shaders) {
   return std::move(program);
 };
 
-Program::Program() {
+ProgramUPtr Program::Create(const std::string& vertex_shader, const std::string& fragment_shader) {
+  ShaderPtr vs = Shader::CreateFromFile(vertex_shader, GL_VERTEX_SHADER);
+  ShaderPtr fs = Shader::CreateFromFile(fragment_shader, GL_FRAGMENT_SHADER);
+  if (!vs || !fs) {
+    return nullptr;
+  }
+  return std::move(Create({vs, fs}));
 };
 
 Program::~Program() {
@@ -59,4 +65,9 @@ void Program::SetUniform(const std::string& name, float value) const {
 void Program::SetUniform(const std::string& name, const glm::vec3& value) const {
   auto loc = glGetUniformLocation(m_program, name.c_str()); // get uniform location
   glUniform3fv(loc, 1, glm::value_ptr(value)); // 1 은 벡터의 개수
+};
+
+void Program::SetUniform(const std::string& name, const glm::vec4& value) const {
+  auto loc = glGetUniformLocation(m_program, name.c_str()); // get uniform location
+  glUniform4fv(loc, 1, glm::value_ptr(value)); // 1 은 벡터의 개수
 };

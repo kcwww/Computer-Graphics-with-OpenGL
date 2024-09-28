@@ -28,6 +28,8 @@ class Context {
     Context() {};
     bool Init();
     ProgramUPtr m_program;
+    // simple
+    ProgramUPtr m_simpleProgram;
 
     VertexLayoutUPtr m_vertexLayout;
     BufferUPtr m_vertexBuffer;
@@ -53,17 +55,43 @@ class Context {
     // clear color
     glm::vec4 m_clearColor { glm::vec4(0.1f, 0.2f, 0.3f, 0.0f) };
 
-    // light parameter
     bool m_animation { true };
-    glm::vec3 m_lightPos { glm::vec3(3.0f, 3.0f, 3.0f) };
+    // // light parameter
+    // glm::vec3 m_lightPos { glm::vec3(3.0f, 3.0f, 3.0f) };
 
-    glm::vec3 m_lightColor { glm::vec3(1.0f) };
-    glm::vec3 m_objectColor { glm::vec3(1.0f, 0.5f, 0.0f) };
-    float m_ambientStrength { 0.1f };
+    // glm::vec3 m_lightColor { glm::vec3(1.0f) };
+    // glm::vec3 m_objectColor { glm::vec3(1.0f, 0.5f, 0.0f) };
+    // float m_ambientStrength { 0.1f };
 
-    // specular
-    float m_specularStrength { 0.5f };
-    float m_specularShininess { 32.0f };
+    // // specular
+    // float m_specularStrength { 0.5f };
+    // float m_specularShininess { 32.0f };
+
+    // light parameter
+    struct Light {
+      glm::vec3 position { glm::vec3(3.0f, 3.0f, 3.0f) };
+      glm::vec3 ambient { glm::vec3(0.1f) };
+      glm::vec3 diffuse { glm::vec3(0.5f) };
+      glm::vec3 specular { glm::vec3(1.0f) };
+    };
+    Light m_light;
+
+    // material parameter
+    struct Material {
+      // glm::vec3 ambient { glm::vec3(1.0f, 0.5f, 0.3f) };
+      // glm::vec3 diffuse { glm::vec3(1.0f, 0.5f, 0.3f) };
+
+      // use texture
+      TextureUPtr diffuse;
+
+      // use texture both
+      TextureUPtr specular;
+
+      // use texture only one
+      // glm::vec3 specular { glm::vec3(0.5f) };
+      float shininess { 32.0f };
+    };
+    Material m_material;
 };
 
 #endif
