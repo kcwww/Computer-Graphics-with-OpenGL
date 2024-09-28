@@ -50,3 +50,13 @@ void Program::SetUniform(const std::string& name, const glm::mat4& value) const 
   auto loc = glGetUniformLocation(m_program, name.c_str()); // get uniform location
   glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(value)); // set uniform
 };
+
+void Program::SetUniform(const std::string& name, float value) const {
+  auto loc = glGetUniformLocation(m_program, name.c_str()); // get uniform location
+  glUniform1f(loc, value); // set uniform
+};
+
+void Program::SetUniform(const std::string& name, const glm::vec3& value) const {
+  auto loc = glGetUniformLocation(m_program, name.c_str()); // get uniform location
+  glUniform3fv(loc, 1, glm::value_ptr(value)); // 1 은 벡터의 개수
+};

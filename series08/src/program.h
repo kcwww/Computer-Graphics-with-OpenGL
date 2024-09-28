@@ -15,6 +15,10 @@ class Program {
     void SetUniform(const std::string& name, int value) const;
     void SetUniform(const std::string& name, const glm::mat4& value) const;
 
+    // add variable
+    void SetUniform(const std::string& name, float value) const;
+    void SetUniform(const std::string& name, const glm::vec3& value) const;
+
   private:
     Program();
     bool Link(const std::vector<ShaderPtr>& shaders);
