@@ -35,3 +35,4 @@ $ ./빌드디렉터리/프로젝트이름
 | [series06](https://github.com/kcwww/Computer-Graphics-with-OpenGL/tree/main/series06) | 선형 변환을 이용한 큐브 그리기 (with. GLM)   |
 | [series07](https://github.com/kcwww/Computer-Graphics-with-OpenGL/tree/main/series07) | 카메라 조작과 GUI (with. ImGui) |
 | [series08](https://github.com/kcwww/Computer-Graphics-with-OpenGL/tree/main/series08) | OpenGL Lighting |
+| [series09](https://github.com/kcwww/Computer-Graphics-with-OpenGL/tree/main/series09) | Light Casting && Object Loader |
