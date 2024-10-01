@@ -103,6 +103,15 @@ void Context::Render()  {
     if (ImGui::Begin("ui window")) {
         if (ImGui::CollapsingHeader("light", ImGuiTreeNodeFlags_DefaultOpen)) {
           ImGui::DragFloat3("light pos", glm::value_ptr(m_light.position), 0.01f);
+
+          // attenuation
+          ImGui::DragFloat("light attenuation", &m_light.distance, 0.5f, 0.0f, 3000.0f);
+          
+          
+          // spot light
+          ImGui::DragFloat3("light direction", glm::value_ptr(m_light.direction), 0.01f);
+          ImGui::DragFloat("light cutOff", &m_light.cutOff, 0.5f, 0.0f, 180.0f);
+
           ImGui::ColorEdit3("light ambient", glm::value_ptr(m_light.ambient));
           ImGui::ColorEdit3("light diffuse", glm::value_ptr(m_light.diffuse));
           ImGui::ColorEdit3("light specular", glm::value_ptr(m_light.specular));
@@ -143,13 +152,11 @@ void Context::Render()  {
     auto view = glm::lookAt(m_cameraPos, m_cameraPos + m_cameraFront, m_cameraUp);
 
 
-    // use struct
+    // draw light
     auto lightModelTransform =
       glm::translate(glm::mat4(1.0), m_light.position) *
       glm::scale(glm::mat4(1.0), glm::vec3(0.1f));
-
-
-    // simple program
+    // simple program 
     m_simpleProgram->Use();
     m_simpleProgram->SetUniform("color", glm::vec4(m_light.ambient + m_light.diffuse, 1.0f));
     m_simpleProgram->SetUniform("transform", projection * view * lightModelTransform);
@@ -158,7 +165,19 @@ void Context::Render()  {
     // progrma 사용
     m_program->Use();
     m_program->SetUniform("viewPos", m_cameraPos);
+
+    // direction light
+    // m_program->SetUniform("light.direction", m_light.direction);
+    
+    // point light
     m_program->SetUniform("light.position", m_light.position);
+    m_program->SetUniform("light.attenuation", GetAttenuationCoeff(m_light.distance));
+
+    // spot light
+    m_program->SetUniform("light.direction", m_light.direction);
+    m_program->SetUniform("light.cutOff", cosf(glm::radians(m_light.cutOff)));
+
+
     m_program->SetUniform("light.ambient", m_light.ambient);
     m_program->SetUniform("light.diffuse", m_light.diffuse);
     m_program->SetUniform("light.specular", m_light.specular);

@@ -17,6 +17,8 @@ using klassName ## UPtr = std::unique_ptr<klassName>; \
 using klassName ## Ptr = std::shared_ptr<klassName>; \
 using klassName ## WPtr = std::weak_ptr<klassName>;
 
+glm::vec3 GetAttenuationCoeff(float distance);
 std::optional<std::string> LoadTextFile(const std::string& filename);
+
 
 #endif
