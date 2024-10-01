@@ -110,7 +110,10 @@ void Context::Render()  {
           
           // spot light
           ImGui::DragFloat3("light direction", glm::value_ptr(m_light.direction), 0.01f);
-          ImGui::DragFloat("light cutOff", &m_light.cutOff, 0.5f, 0.0f, 180.0f);
+          // ImGui::DragFloat("light cutOff", &m_light.cutOff, 0.5f, 0.0f, 180.0f);
+
+          // use intensity
+          ImGui::DragFloat2("light cutOff", glm::value_ptr(m_light.cutOff), 0.5f, 0.0f, 180.0f);
 
           ImGui::ColorEdit3("light ambient", glm::value_ptr(m_light.ambient));
           ImGui::ColorEdit3("light diffuse", glm::value_ptr(m_light.diffuse));
@@ -149,18 +152,22 @@ void Context::Render()  {
         glm::rotate(glm::mat4(1.0f), glm::radians(m_cameraPitch), glm::vec3(1.0f, 0.0f, 0.0f)) *
         glm::vec4(0.0f, 0.0f, -1.0f, 0.0f);
 
+    // flashlight
+    m_light.position = m_cameraPos;
+    m_light.direction = m_cameraFront;
+
     auto view = glm::lookAt(m_cameraPos, m_cameraPos + m_cameraFront, m_cameraUp);
 
 
-    // draw light
-    auto lightModelTransform =
-      glm::translate(glm::mat4(1.0), m_light.position) *
-      glm::scale(glm::mat4(1.0), glm::vec3(0.1f));
-    // simple program 
-    m_simpleProgram->Use();
-    m_simpleProgram->SetUniform("color", glm::vec4(m_light.ambient + m_light.diffuse, 1.0f));
-    m_simpleProgram->SetUniform("transform", projection * view * lightModelTransform);
-    glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+    // // draw light
+    // auto lightModelTransform =
+    //   glm::translate(glm::mat4(1.0), m_light.position) *
+    //   glm::scale(glm::mat4(1.0), glm::vec3(0.1f));
+    // // simple program 
+    // m_simpleProgram->Use();
+    // m_simpleProgram->SetUniform("color", glm::vec4(m_light.ambient + m_light.diffuse, 1.0f));
+    // m_simpleProgram->SetUniform("transform", projection * view * lightModelTransform);
+    // glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 
     // progrma 사용
     m_program->Use();
@@ -175,7 +182,10 @@ void Context::Render()  {
 
     // spot light
     m_program->SetUniform("light.direction", m_light.direction);
-    m_program->SetUniform("light.cutOff", cosf(glm::radians(m_light.cutOff)));
+    // m_program->SetUniform("light.cutOff", cosf(glm::radians(m_light.cutOff)));
+
+    // use intensity
+    m_program->SetUniform("light.cutOff", glm::vec2(cosf(glm::radians(m_light.cutOff[0])), cosf(glm::radians(m_light.cutOff[0] + m_light.cutOff[1]))));
 
 
     m_program->SetUniform("light.ambient", m_light.ambient);

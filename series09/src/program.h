@@ -20,6 +20,7 @@ class Program {
 
     // add variable
     void SetUniform(const std::string& name, float value) const;
+    void SetUniform(const std::string& name, const glm::vec2& value) const;
     void SetUniform(const std::string& name, const glm::vec3& value) const;
 
     void SetUniform(const std::string& name, const glm::vec4& value) const;

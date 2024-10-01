@@ -11,8 +11,9 @@ struct Light {
   
   // spotlight
   vec3 direction;
-  float cutOff;
-  
+  // float cutOff;
+  vec2 cutOff; // cutOff, outerCutOff
+
   vec3 ambient;
   vec3 diffuse;
   vec3 specular;
@@ -45,9 +46,12 @@ void main() {
   
   // spotlight
   float theta = dot(lightDir, normalize(-light.direction)); // spotlight angle
+  float intensity = clamp((theta - light.cutOff[1]) / (light.cutOff[0] - light.cutOff[1]), 0.0, 1.0); // spotlight intensity
   vec3 result = ambient;
 
-  if (theta > light.cutOff) {
+  // if (theta > light.cutOff) {
+  // use intensity
+  if (intensity > 0.0) {
     vec3 pixelNorm = normalize(normal);
     float diff = max(dot(pixelNorm, lightDir), 0.0);
     vec3 diffuse = diff * light.diffuse * texColor;
@@ -59,7 +63,10 @@ void main() {
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
     vec3 specular = spec * light.specular * specColor;
 
-    result += diffuse + specular;
+    // result += diffuse + specular;
+
+    // use intensity
+    result += (diffuse + specular) * intensity;
   }
 
   result *= attenuation;

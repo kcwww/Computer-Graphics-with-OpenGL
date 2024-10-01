@@ -67,7 +67,10 @@ private:
 
     // spot light
     glm::vec3 direction {glm::vec3(-1.0f, -1.0f, -1.0f)};
-    float cutOff { 20.0f };
+    // float cutOff { 20.0f };
+
+    // use intensity
+    glm::vec2 cutOff { glm::vec2(20.0f, 5.0f) };
 
     glm::vec3 ambient{glm::vec3(0.1f)};
     glm::vec3 diffuse{glm::vec3(0.5f)};
