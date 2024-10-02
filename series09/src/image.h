@@ -5,9 +5,10 @@
 
 CLASS_PTR(Image)
 class Image {
-  public:
+public:
     static ImageUPtr Load(const std::string& filepath);
-    static ImageUPtr Create(int width, int height, int channelCount = 4); // 4는 RGBA
+    static ImageUPtr Create(int width, int height, int channelCount = 4);
+    static ImageUPtr CreateSingleColorImage(int width, int height, const glm::vec4& color);
     ~Image();
 
     const uint8_t* GetData() const { return m_data; }
@@ -16,15 +17,15 @@ class Image {
     int GetChannelCount() const { return m_channelCount; }
 
     void SetCheckImage(int gridX, int gridY);
-
-  private:
+    
+private:
     Image() {};
     bool LoadWithStb(const std::string& filepath);
-    bool Allocate(int width, int height, int channelCount); // allocate memory for image data 
+    bool Allocate(int width, int height, int channelCount);
     int m_width { 0 };
     int m_height { 0 };
     int m_channelCount { 0 };
     uint8_t* m_data { nullptr };
 };
 
-#endif 
+#endif // __IMAGE_H__
