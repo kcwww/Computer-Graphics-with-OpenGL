@@ -34,7 +34,7 @@ private:
 
     // animation
     bool m_animation { true };
-
+    
     // clear color
     glm::vec4 m_clearColor { glm::vec4(0.1f, 0.2f, 0.3f, 0.0f) };
 
@@ -49,6 +49,7 @@ private:
         glm::vec3 specular { glm::vec3(1.0f, 1.0f, 1.0f) };
     };
     Light m_light;
+    bool m_flashLightMode { false };
 
     // material parameter
     MaterialPtr m_material;
