@@ -66,7 +66,21 @@ bool Context::Init() {
   // 인덱스 버퍼 생성
   m_elementBuffer = Buffer::CraeteWithData(GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW, indices, sizeof(indices));
   
-  
+  // // Shader 생성
+  // ShaderPtr vertexShader = Shader::CreateFromFile("./shader/lighting.vs", GL_VERTEX_SHADER);
+  // ShaderPtr fragmentShader = Shader::CreateFromFile("./shader/lighting.fs", GL_FRAGMENT_SHADER);
+  // SPDLOG_INFO("vertexShader : {}", vertexShader->Get());
+  // SPDLOG_INFO("fragmentShader : {}", fragmentShader->Get());
+  // if (!vertexShader || !fragmentShader) {
+  //   return false;
+  // }
+  // // Program 생성
+  // m_program = Program::Create({vertexShader, fragmentShader});
+  // if (!m_program) {
+  //   return false;
+  // }
+  // SPDLOG_INFO("program : {}", m_program->Get());
+
   m_simpleProgram = Program::Create("./shader/simple.vs", "./shader/simple.fs");
   if (!m_simpleProgram)
     return false;
@@ -76,7 +90,7 @@ bool Context::Init() {
     return false;
   
 
-  glClearColor(0.1f, 0.2f, 0.3f, 0.0f);
+  glClearColor(0.1f, 0.2f, 0.3f, 0.0f); //화면을 지울 때 사용할 배경색을 설정 RGB 투명도
   
 
   auto image = Image::Load("./image/container.jpg");
@@ -98,29 +112,37 @@ bool Context::Init() {
 
 
 
-void Context::Render()  {
+void Context::Render() {
+
+    // // light parameter
+    // if (ImGui::Begin("ui window")) {
+    //     if (ImGui::CollapsingHeader("light", ImGuiTreeNodeFlags_DefaultOpen)) {
+    //       ImGui::DragFloat3("light pos", glm::value_ptr(m_lightPos), 0.01f);
+    //       ImGui::ColorEdit3("light color", glm::value_ptr(m_lightColor));
+    //       ImGui::ColorEdit3("object color", glm::value_ptr(m_objectColor));
+    //       ImGui::SliderFloat("ambient strength", &m_ambientStrength, 0.0f, 1.0f);
+    //       ImGui::SliderFloat("specular strength", &m_specularStrength, 0.0f, 1.0f);
+    //       ImGui::DragFloat("shininess", &m_specularShininess, 1.0f, 1.0f, 256.0f);
+    //     }
+    //     // animation
+    //     ImGui::Checkbox("animation", &m_animation);
+    // }
+    // ImGui::End();
+
+
     // light parameter
     if (ImGui::Begin("ui window")) {
         if (ImGui::CollapsingHeader("light", ImGuiTreeNodeFlags_DefaultOpen)) {
           ImGui::DragFloat3("light pos", glm::value_ptr(m_light.position), 0.01f);
-
-          // attenuation
-          ImGui::DragFloat("light attenuation", &m_light.distance, 0.5f, 0.0f, 3000.0f);
-          
-          
-          // spot light
-          ImGui::DragFloat3("light direction", glm::value_ptr(m_light.direction), 0.01f);
-          // ImGui::DragFloat("light cutOff", &m_light.cutOff, 0.5f, 0.0f, 180.0f);
-
-          // use intensity
-          ImGui::DragFloat2("light cutOff", glm::value_ptr(m_light.cutOff), 0.5f, 0.0f, 180.0f);
-
           ImGui::ColorEdit3("light ambient", glm::value_ptr(m_light.ambient));
           ImGui::ColorEdit3("light diffuse", glm::value_ptr(m_light.diffuse));
           ImGui::ColorEdit3("light specular", glm::value_ptr(m_light.specular));
         }
         // animation
         if (ImGui::CollapsingHeader("material", ImGuiTreeNodeFlags_DefaultOpen)) {
+          // ImGui::ColorEdit3("material ambient", glm::value_ptr(m_material.ambient));
+          // ImGui::ColorEdit3("material diffuse", glm::value_ptr(m_material.diffuse));
+          // ImGui::ColorEdit3("material specular", glm::value_ptr(m_material.specular));
           ImGui::DragFloat("shininess", &m_material.shininess, 1.0f, 1.0f, 256.0f);
         }
         ImGui::Checkbox("animation", &m_animation);
@@ -152,47 +174,69 @@ void Context::Render()  {
         glm::rotate(glm::mat4(1.0f), glm::radians(m_cameraPitch), glm::vec3(1.0f, 0.0f, 0.0f)) *
         glm::vec4(0.0f, 0.0f, -1.0f, 0.0f);
 
-    // flashlight
-    m_light.position = m_cameraPos;
-    m_light.direction = m_cameraFront;
-
     auto view = glm::lookAt(m_cameraPos, m_cameraPos + m_cameraFront, m_cameraUp);
 
 
-    // // draw light
+    // // light model transform
     // auto lightModelTransform =
-    //   glm::translate(glm::mat4(1.0), m_light.position) *
+    //   glm::translate(glm::mat4(1.0), m_lightPos) *
     //   glm::scale(glm::mat4(1.0), glm::vec3(0.1f));
-    // // simple program 
-    // m_simpleProgram->Use();
-    // m_simpleProgram->SetUniform("color", glm::vec4(m_light.ambient + m_light.diffuse, 1.0f));
-    // m_simpleProgram->SetUniform("transform", projection * view * lightModelTransform);
+    // m_program->Use();
+    // m_program->SetUniform("lightPos", m_lightPos);
+    // m_program->SetUniform("lightColor", glm::vec3(1.0f));
+    // m_program->SetUniform("objectColor", glm::vec3(1.0f));
+    // m_program->SetUniform("ambientStrength", 1.0f);
+    // m_program->SetUniform("transform", projection * view * lightModelTransform);
+    // m_program->SetUniform("modelTransform", lightModelTransform);
     // glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+
+    // // progrma 사용
+    // m_program->Use();
+    // m_program->SetUniform("lightColor", m_lightColor);
+    // m_program->SetUniform("objectColor", m_objectColor);
+    // m_program->SetUniform("ambientStrength", m_ambientStrength);
+    // // lightPos
+    // m_program->SetUniform("lightPos", m_lightPos);
+    // // specular
+    // m_program->SetUniform("viewPos", m_cameraPos);
+    // m_program->SetUniform("specularStrength", m_specularStrength);
+    // m_program->SetUniform("specularShininess", m_specularShininess);
+
+
+    // use struct
+    auto lightModelTransform =
+      glm::translate(glm::mat4(1.0), m_light.position) *
+      glm::scale(glm::mat4(1.0), glm::vec3(0.1f));
+
+    // m_program->Use();
+    // m_program->SetUniform("light.position", m_light.position);
+    // m_program->SetUniform("light.ambient", m_light.diffuse);
+    // m_program->SetUniform("material.ambient", m_light.diffuse);
+    // m_program->SetUniform("transform", projection * view * lightModelTransform);
+    // m_program->SetUniform("modelTransform", lightModelTransform);
+    // glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+
+    // simple program
+    m_simpleProgram->Use();
+    m_simpleProgram->SetUniform("color", glm::vec4(m_light.ambient + m_light.diffuse, 1.0f));
+    m_simpleProgram->SetUniform("transform", projection * view * lightModelTransform);
+    glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 
     // progrma 사용
     m_program->Use();
     m_program->SetUniform("viewPos", m_cameraPos);
-
-    // direction light
-    // m_program->SetUniform("light.direction", m_light.direction);
-    
-    // point light
     m_program->SetUniform("light.position", m_light.position);
-    m_program->SetUniform("light.attenuation", GetAttenuationCoeff(m_light.distance));
-
-    // spot light
-    m_program->SetUniform("light.direction", m_light.direction);
-    // m_program->SetUniform("light.cutOff", cosf(glm::radians(m_light.cutOff)));
-
-    // use intensity
-    m_program->SetUniform("light.cutOff", glm::vec2(cosf(glm::radians(m_light.cutOff[0])), cosf(glm::radians(m_light.cutOff[0] + m_light.cutOff[1]))));
-
-
     m_program->SetUniform("light.ambient", m_light.ambient);
     m_program->SetUniform("light.diffuse", m_light.diffuse);
     m_program->SetUniform("light.specular", m_light.specular);
+    // m_program->SetUniform("material.ambient", m_material.ambient);
+    // m_program->SetUniform("material.diffuse", m_material.diffuse);
 
+    // use texture
     m_program->SetUniform("material.diffuse", 0); // 0번째 텍스처 사용
+    // m_program->SetUniform("material.specular", m_material.specular);
+
+    // use texture both
     m_program->SetUniform("material.specular", 1); // 1번째 텍스처 사용
 
     m_program->SetUniform("material.shininess", m_material.shininess);
