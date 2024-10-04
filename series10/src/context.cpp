@@ -131,7 +131,7 @@ void Context::Render()
         glm::vec4(0.0f, 0.0f, -1.0f, 0.0f);
 
     auto projection = glm::perspective(glm::radians(45.0f),
-                                       (float)m_width / (float)m_height, 0.01f, 20.0f);
+                                       (float)m_width / (float)m_height, 0.01f, 1000.0f);
     auto view = glm::lookAt(
         m_cameraPos,
         m_cameraPos + m_cameraFront,
@@ -166,6 +166,35 @@ void Context::Render()
     m_program->SetUniform("light.ambient", m_light.ambient);
     m_program->SetUniform("light.diffuse", m_light.diffuse);
     m_program->SetUniform("light.specular", m_light.specular);
+
+    auto modelTransform =
+        glm::translate(glm::mat4(1.0), glm::vec3(0.0f, -0.5f, 0.0f)) *
+        glm::scale(glm::mat4(1.0), glm::vec3(10.0f, 1.0f, 10.0f));
+    auto transform = projection * view * modelTransform;
+    m_program->SetUniform("transform", transform);
+    m_program->SetUniform("modelTransform", modelTransform);
+    m_planeMaterial->SetToProgram(m_program.get());
+    m_box->Draw(m_program.get());
+
+    modelTransform =
+        glm::translate(glm::mat4(1.0), glm::vec3(-1.0f, 0.75f, -4.0f)) *
+        glm::rotate(glm::mat4(1.0), glm::radians(30.0f), glm::vec3(0.0f, 1.0f, 0.0f)) *
+        glm::scale(glm::mat4(1.0), glm::vec3(1.5f));
+    transform = projection * view * modelTransform;
+    m_program->SetUniform("transform", transform);
+    m_program->SetUniform("modelTransform", modelTransform);
+    m_box1Material->SetToProgram(m_program.get());
+    m_box->Draw(m_program.get());
+
+    modelTransform =
+        glm::translate(glm::mat4(1.0), glm::vec3(0.0f, 0.75f, 2.0f)) *
+        glm::rotate(glm::mat4(1.0), glm::radians(20.0f), glm::vec3(0.0f, 1.0f, 0.0f)) *
+        glm::scale(glm::mat4(1.0), glm::vec3(1.5f));
+    transform = projection * view * modelTransform;
+    m_program->SetUniform("transform", transform);
+    m_program->SetUniform("modelTransform", modelTransform);
+    m_box2Material->SetToProgram(m_program.get());
+    m_box->Draw(m_program.get());
 }
 
 bool Context::Init()
@@ -193,6 +222,32 @@ bool Context::Init()
         Image::CreateSingleColorImage(4, 4,
                                       glm::vec4(0.5f, 0.5f, 0.5f, 1.0f))
             .get());
+
+    // gray texture
+    TexturePtr darkGrayTexture = Texture::CreateFromImage(
+        Image::CreateSingleColorImage(4, 4, glm::vec4(0.2f, 0.2f, 0.2f, 1.0f)).get());
+
+    TexturePtr grayTexture = Texture::CreateFromImage(
+        Image::CreateSingleColorImage(4, 4, glm::vec4(0.5f, 0.5f, 0.5f, 1.0f)).get());
+
+    m_planeMaterial = Material::Create();
+    m_planeMaterial->diffuse = Texture::CreateFromImage(
+        Image::Load("./image/marble.jpg").get());
+    m_planeMaterial->specular = grayTexture;
+    m_planeMaterial->shininess = 128.0f;
+
+    m_box1Material = Material::Create();
+    m_box1Material->diffuse = Texture::CreateFromImage(
+        Image::Load("./image/container.jpg").get());
+    m_box1Material->specular = darkGrayTexture;
+    m_box1Material->shininess = 16.0f;
+
+    m_box2Material = Material::Create();
+    m_box2Material->diffuse = Texture::CreateFromImage(
+        Image::Load("./image/container2.png").get());
+    m_box2Material->specular = Texture::CreateFromImage(
+        Image::Load("./image/container2_specular.png").get());
+    m_box2Material->shininess = 64.0f;
 
     return true;
 }
