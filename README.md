@@ -36,3 +36,4 @@ $ ./빌드디렉터리/프로젝트이름
 | [series07](https://github.com/kcwww/Computer-Graphics-with-OpenGL/tree/main/series07) | 카메라 조작과 GUI (with. ImGui) |
 | [series08](https://github.com/kcwww/Computer-Graphics-with-OpenGL/tree/main/series08) | OpenGL Lighting |
 | [series09](https://github.com/kcwww/Computer-Graphics-with-OpenGL/tree/main/series09) | Light Casting && Object Loader |
+| [series10](https://github.com/kcwww/Computer-Graphics-with-OpenGL/tree/main/series10) | Depth, Stencil, Frame |
