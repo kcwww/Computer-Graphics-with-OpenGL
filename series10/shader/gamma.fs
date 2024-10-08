@@ -4,15 +4,9 @@ in vec2 texCoord;
 out vec4 fragColor;
 
 uniform sampler2D tex;
-
+uniform float gamma;
 
 void main() {
-    // fragColor = texture(tex, texCoord);
-
-    // remove transparent pixels
     vec4 pixel = texture(tex, texCoord);
-    if (pixel.a < 0.01) {
-        discard;
-    }
-    fragColor = pixel;
+    fragColor = vec4(pow(pixel.rgb, vec3(gamma)), 1.0);
 }

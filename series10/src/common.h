@@ -8,6 +8,7 @@
 #include <vector>
 #include <string>
 #include <optional>
+#include <spdlog/spdlog.h>
 #include <glad/glad.h>
 #include <glfw/glfw3.h>
 #include <glm/glm.hpp>

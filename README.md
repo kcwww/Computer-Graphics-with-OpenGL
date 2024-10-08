@@ -31,9 +31,9 @@ $ ./빌드디렉터리/프로젝트이름
 | [series02](https://www.chanwooyam.dev/series/computer-graphics/2IYzBkIto4h4tlnClmzU)  | OpenGL 을 활용한 GLFW 기초 예제입니다.                  |
 | [series03](https://github.com/kcwww/Computer-Graphics-with-OpenGL/tree/main/series03) | OpenGL 그래픽스 파이프라인 구축하기                     |
 | [series04](https://github.com/kcwww/Computer-Graphics-with-OpenGL/tree/main/series04) | shader 로 삼각형 그리기 (with. GLSL)                    |
-| [series05](https://github.com/kcwww/Computer-Graphics-with-OpenGL/tree/main/series05) | Texture in OpenGL      |
-| [series06](https://github.com/kcwww/Computer-Graphics-with-OpenGL/tree/main/series06) | 선형 변환을 이용한 큐브 그리기 (with. GLM)   |
-| [series07](https://github.com/kcwww/Computer-Graphics-with-OpenGL/tree/main/series07) | 카메라 조작과 GUI (with. ImGui) |
-| [series08](https://github.com/kcwww/Computer-Graphics-with-OpenGL/tree/main/series08) | OpenGL Lighting |
-| [series09](https://github.com/kcwww/Computer-Graphics-with-OpenGL/tree/main/series09) | Light Casting && Object Loader |
-| [series10](https://github.com/kcwww/Computer-Graphics-with-OpenGL/tree/main/series10) | Depth, Stencil, Frame |
+| [series05](https://github.com/kcwww/Computer-Graphics-with-OpenGL/tree/main/series05) | Texture in OpenGL                                       |
+| [series06](https://github.com/kcwww/Computer-Graphics-with-OpenGL/tree/main/series06) | 선형 변환을 이용한 큐브 그리기 (with. GLM)              |
+| [series07](https://github.com/kcwww/Computer-Graphics-with-OpenGL/tree/main/series07) | 카메라 조작과 GUI (with. ImGui)                         |
+| [series08](https://github.com/kcwww/Computer-Graphics-with-OpenGL/tree/main/series08) | OpenGL Lighting                                         |
+| [series09](https://github.com/kcwww/Computer-Graphics-with-OpenGL/tree/main/series09) | Light Casting && Object Loader                          |
+| [series10](https://github.com/kcwww/Computer-Graphics-with-OpenGL/tree/main/series10) | Depth, Stencil, Blending, Face Culling, Frame           |

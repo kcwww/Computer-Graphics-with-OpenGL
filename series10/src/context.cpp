@@ -38,6 +38,8 @@ void Context::Reshape(int width, int height)
     m_width = width;
     m_height = height;
     glViewport(0, 0, m_width, m_height);
+
+    m_framebuffer = Framebuffer::Create(Texture::Create(std::max(1, width), std::max(1, height), GL_RGBA)); // 화면이 리사이징 될때 framebuffer도 리사이징
 }
 
 void Context::MouseMove(double x, double y)
@@ -107,6 +109,7 @@ void Context::Render()
         {
             glClearColor(m_clearColor.r, m_clearColor.g, m_clearColor.b, m_clearColor.a);
         }
+        ImGui::DragFloat("gamma", &m_gamma, 0.01f, 0.0f, 2.0f);
         ImGui::Separator();
         ImGui::DragFloat3("camera pos", glm::value_ptr(m_cameraPos), 0.01f);
         ImGui::DragFloat("camera yaw", &m_cameraYaw, 0.5f);
@@ -121,7 +124,11 @@ void Context::Render()
     }
     ImGui::End();
 
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    // frame buffer 사용
+    m_framebuffer->Bind();
+
+    // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
     m_cameraFront =
         glm::rotate(glm::mat4(1.0f),
@@ -131,7 +138,7 @@ void Context::Render()
         glm::vec4(0.0f, 0.0f, -1.0f, 0.0f);
 
     auto projection = glm::perspective(glm::radians(45.0f),
-                                       (float)m_width / (float)m_height, 0.01f, 1000.0f);
+                                       (float)m_width / (float)m_height, 0.1f, 30.0f);
     auto view = glm::lookAt(
         m_cameraPos,
         m_cameraPos + m_cameraFront,
@@ -186,6 +193,7 @@ void Context::Render()
     m_box1Material->SetToProgram(m_program.get());
     m_box->Draw(m_program.get());
 
+    // second box
     modelTransform =
         glm::translate(glm::mat4(1.0), glm::vec3(0.0f, 0.75f, 2.0f)) *
         glm::rotate(glm::mat4(1.0), glm::radians(20.0f), glm::vec3(0.0f, 1.0f, 0.0f)) *
@@ -195,6 +203,42 @@ void Context::Render()
     m_program->SetUniform("modelTransform", modelTransform);
     m_box2Material->SetToProgram(m_program.get());
     m_box->Draw(m_program.get());
+
+    // make blending window
+    glEnable(GL_BLEND);                                // blending 활성화
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // blending 방식 설정 (src * src_alpha + dest * (1 - src_alpha))
+
+    // cull face test
+    // glEnable(GL_CULL_FACE);
+    // glCullFace(GL_FRONT);
+
+    m_textureProgram->Use();
+    m_windowTexture->Bind();
+    m_textureProgram->SetUniform("tex", 0);
+
+    modelTransform =
+        glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.5f, 4.0f));
+    transform = projection * view * modelTransform;
+    m_textureProgram->SetUniform("transform", transform);
+    m_plane->Draw(m_textureProgram.get());
+    modelTransform =
+        glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 1.0f, 6.0f));
+    transform = projection * view * modelTransform;
+    m_textureProgram->SetUniform("transform", transform);
+    m_plane->Draw(m_textureProgram.get());
+
+    // 그림을 그리고 디폴트 화면으로 바인딩
+    Framebuffer::BindToDefault();
+
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+    m_postProgram->Use();
+    m_postProgram->SetUniform("transform",
+                              glm::scale(glm::mat4(1.0f), glm::vec3(2.0f, 2.0f, 1.0f)));
+    m_framebuffer->GetColorAttachment()->Bind();
+    m_postProgram->SetUniform("tex", 0);
+    m_postProgram->SetUniform("gamma", m_gamma); // gamma 설정
+    m_plane->Draw(m_postProgram.get());
 }
 
 bool Context::Init()
@@ -210,6 +254,15 @@ bool Context::Init()
 
     m_program = Program::Create("./shader/lighting.vs", "./shader/lighting.fs");
     if (!m_program)
+        return false;
+
+    m_textureProgram = Program::Create("./shader/texture.vs", "./shader/texture.fs");
+    if (!m_textureProgram)
+        return false;
+
+    // m_postProgram = Program::Create("./shader/texture.vs", "./shader/invert.fs");
+    m_postProgram = Program::Create("./shader/texture.vs", "./shader/gamma.fs");
+    if (!m_postProgram)
         return false;
 
     m_material = Material::Create();
@@ -249,5 +302,41 @@ bool Context::Init()
         Image::Load("./image/container2_specular.png").get());
     m_box2Material->shininess = 64.0f;
 
+    // plane mesh 생성, window texture 로 material 설정
+    m_plane = Mesh::CreatePlane();
+    m_windowTexture = Texture::CreateFromImage(Image::Load("./image/blending_transparent_window.png").get());
+
     return true;
 }
+
+// // use stencil buffer
+// glEnable(GL_STENCIL_TEST);
+// glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE); // 리플레이스 값은 스텐실 테스트를 통과한 경우에만 스텐실 버퍼의 값을 변경, stencil fail, depth fail, depth pass 순서
+// glStencilFunc(GL_ALWAYS, 1, 0xFF);         // 어떤 조건에서 스텐실 버퍼의 값을 무엇으로 변경할지 결정
+// glStencilMask(0xFF);                       // 스텐실 버퍼의 값을 변경할 때 사용할 비트를 설정
+
+// // 일반 물체 그리기
+// modelTransform =
+//     glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.75f, 2.0f)) *
+//     glm::rotate(glm::mat4(1.0f), glm::radians(20.0f), glm::vec3(0.0f, 1.0f, 0.0f)) *
+//     glm::scale(glm::mat4(1.0f), glm::vec3(1.5f));
+// transform = projection * view * modelTransform;
+// m_program->SetUniform("transform", transform);
+// m_program->SetUniform("modelTransform", modelTransform);
+// m_box2Material->SetToProgram(m_program.get());
+// m_box->Draw(m_program.get());
+
+// // 스텐실 버퍼에 있는 값이 1인 경우에만 그림 , 확대된 크기로 그려 윤곽선을 그림
+// glStencilFunc(GL_NOTEQUAL, 1, 0xFF); // 1이 아닌 값만 그림
+// glStencilMask(0x00);                 // 스텐실 버퍼의 값을 변경하지 않음
+// glDisable(GL_DEPTH_TEST);            // 스텐실 버퍼에 있는 값이 1이 아닌 경우에만 그리기 때문에 깊이 테스트를 비활성화
+// m_simpleProgram->Use();
+// m_simpleProgram->SetUniform("color", glm::vec4(1.0f, 1.0f, 0.5f, 1.0f));
+// m_simpleProgram->SetUniform("transform", transform *
+//                                              glm::scale(glm::mat4(1.0f), glm::vec3(1.05f)));
+// m_box->Draw(m_simpleProgram.get());
+
+// glEnable(GL_DEPTH_TEST);
+// glDisable(GL_STENCIL_TEST);
+// glStencilFunc(GL_ALWAYS, 1, 0xFF);
+// glStencilMask(0xFF);

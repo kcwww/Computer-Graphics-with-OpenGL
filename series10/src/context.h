@@ -9,6 +9,7 @@
 #include "texture.h"
 #include "mesh.h"
 #include "model.h"
+#include "framebuffer.h"
 
 CLASS_PTR(Context)
 class Context
@@ -26,8 +27,18 @@ private:
     bool Init();
     ProgramUPtr m_program;
     ProgramUPtr m_simpleProgram;
+    // texture program
+    ProgramUPtr m_textureProgram;
+    // post processing program
+    ProgramUPtr m_postProgram;
+    // gamma
+    float m_gamma{1.0f};
 
     MeshUPtr m_box;
+
+    // window
+    MeshUPtr m_plane;
+    TexturePtr m_windowTexture;
 
     int m_width{640};
     int m_height{480};
@@ -68,6 +79,9 @@ private:
     MaterialPtr m_planeMaterial;
     MaterialPtr m_box1Material;
     MaterialPtr m_box2Material;
+
+    // frame buffer
+    FramebufferUPtr m_framebuffer;
 };
 
 #endif // __CONTEXT_H__
