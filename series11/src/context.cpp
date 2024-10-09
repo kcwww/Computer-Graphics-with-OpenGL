@@ -138,11 +138,20 @@ void Context::Render()
         glm::vec4(0.0f, 0.0f, -1.0f, 0.0f);
 
     auto projection = glm::perspective(glm::radians(45.0f),
-                                       (float)m_width / (float)m_height, 0.1f, 30.0f);
+                                       (float)m_width / (float)m_height, 0.01f, 100.0f);
     auto view = glm::lookAt(
         m_cameraPos,
         m_cameraPos + m_cameraFront,
         m_cameraUp);
+
+    // skybox render
+    auto skyboxModelTransform = glm::translate(glm::mat4(1.0), m_cameraPos) *
+                                glm::scale(glm::mat4(1.0), glm::vec3(50.0f));
+    m_skyboxProgram->Use();
+    m_cubeTexture->Bind();
+    m_skyboxProgram->SetUniform("skybox", 0);
+    m_skyboxProgram->SetUniform("transform", projection * view * skyboxModelTransform);
+    m_box->Draw(m_skyboxProgram.get());
 
     glm::vec3 lightPos = m_light.position;
     glm::vec3 lightDir = m_light.direction;
@@ -208,10 +217,6 @@ void Context::Render()
     glEnable(GL_BLEND);                                // blending 활성화
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // blending 방식 설정 (src * src_alpha + dest * (1 - src_alpha))
 
-    // cull face test
-    // glEnable(GL_CULL_FACE);
-    // glCullFace(GL_FRONT);
-
     m_textureProgram->Use();
     m_windowTexture->Bind();
     m_textureProgram->SetUniform("tex", 0);
@@ -226,6 +231,19 @@ void Context::Render()
     transform = projection * view * modelTransform;
     m_textureProgram->SetUniform("transform", transform);
     m_plane->Draw(m_textureProgram.get());
+
+    modelTransform =
+        glm::translate(glm::mat4(1.0f), glm::vec3(1.0f, 0.75f, -2.0f)) *
+        glm::rotate(glm::mat4(1.0), glm::radians(40.0f), glm::vec3(0.0f, 1.0f, 0.0f)) *
+        glm::scale(glm::mat4(1.0), glm::vec3(1.5f));
+    m_envMapProgram->Use();
+    m_envMapProgram->SetUniform("model", modelTransform);
+    m_envMapProgram->SetUniform("view", view);
+    m_envMapProgram->SetUniform("projection", projection);
+    m_envMapProgram->SetUniform("cameraPos", m_cameraPos);
+    m_cubeTexture->Bind();
+    m_envMapProgram->SetUniform("skybox", 0);
+    m_box->Draw(m_envMapProgram.get());
 
     // 그림을 그리고 디폴트 화면으로 바인딩
     Framebuffer::BindToDefault();
@@ -306,37 +324,22 @@ bool Context::Init()
     m_plane = Mesh::CreatePlane();
     m_windowTexture = Texture::CreateFromImage(Image::Load("./image/blending_transparent_window.png").get());
 
+    // cube map texture 생성
+    auto cubeRight = Image::Load("./image/skybox/right.jpg", false);
+    auto cubeLeft = Image::Load("./image/skybox/left.jpg", false);
+    auto cubeTop = Image::Load("./image/skybox/top.jpg", false);
+    auto cubeBottom = Image::Load("./image/skybox/bottom.jpg", false);
+    auto cubeFront = Image::Load("./image/skybox/front.jpg", false);
+    auto cubeBack = Image::Load("./image/skybox/back.jpg", false);
+    m_cubeTexture = CubeTexture::CreateFromImages({cubeRight.get(), cubeLeft.get(),
+                                                   cubeTop.get(), cubeBottom.get(),
+                                                   cubeFront.get(), cubeBack.get()});
+    m_skyboxProgram = Program::Create("./shader/skybox.vs", "./shader/skybox.fs");
+    if (!m_skyboxProgram)
+        return false;
+    m_envMapProgram = Program::Create("./shader/env_map.vs", "./shader/env_map.fs");
+    if (!m_envMapProgram)
+        return false;
+    SPDLOG_INFO("context init success");
     return true;
 }
-
-// // use stencil buffer
-// glEnable(GL_STENCIL_TEST);
-// glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE); // 리플레이스 값은 스텐실 테스트를 통과한 경우에만 스텐실 버퍼의 값을 변경, stencil fail, depth fail, depth pass 순서
-// glStencilFunc(GL_ALWAYS, 1, 0xFF);         // 어떤 조건에서 스텐실 버퍼의 값을 무엇으로 변경할지 결정
-// glStencilMask(0xFF);                       // 스텐실 버퍼의 값을 변경할 때 사용할 비트를 설정
-
-// // 일반 물체 그리기
-// modelTransform =
-//     glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.75f, 2.0f)) *
-//     glm::rotate(glm::mat4(1.0f), glm::radians(20.0f), glm::vec3(0.0f, 1.0f, 0.0f)) *
-//     glm::scale(glm::mat4(1.0f), glm::vec3(1.5f));
-// transform = projection * view * modelTransform;
-// m_program->SetUniform("transform", transform);
-// m_program->SetUniform("modelTransform", modelTransform);
-// m_box2Material->SetToProgram(m_program.get());
-// m_box->Draw(m_program.get());
-
-// // 스텐실 버퍼에 있는 값이 1인 경우에만 그림 , 확대된 크기로 그려 윤곽선을 그림
-// glStencilFunc(GL_NOTEQUAL, 1, 0xFF); // 1이 아닌 값만 그림
-// glStencilMask(0x00);                 // 스텐실 버퍼의 값을 변경하지 않음
-// glDisable(GL_DEPTH_TEST);            // 스텐실 버퍼에 있는 값이 1이 아닌 경우에만 그리기 때문에 깊이 테스트를 비활성화
-// m_simpleProgram->Use();
-// m_simpleProgram->SetUniform("color", glm::vec4(1.0f, 1.0f, 0.5f, 1.0f));
-// m_simpleProgram->SetUniform("transform", transform *
-//                                              glm::scale(glm::mat4(1.0f), glm::vec3(1.05f)));
-// m_box->Draw(m_simpleProgram.get());
-
-// glEnable(GL_DEPTH_TEST);
-// glDisable(GL_STENCIL_TEST);
-// glStencilFunc(GL_ALWAYS, 1, 0xFF);
-// glStencilMask(0xFF);

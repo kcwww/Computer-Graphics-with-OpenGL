@@ -36,7 +36,7 @@ CLASS_PTR(CubeTexture)
 class CubeTexture
 {
 public:
-    static CubeTextureUPtr CreateFromImages(const std::vector<Image *> images);
+    static CubeTextureUPtr CreateFromImages(const std::vector<Image *> &images);
     ~CubeTexture();
 
     const uint32_t Get() const { return m_texture; }
@@ -44,7 +44,7 @@ public:
 
 private:
     CubeTexture() {}
-    bool InitFromImages(const std::vector<Image *> images);
+    bool InitFromImages(const std::vector<Image *> &images);
 
     uint32_t m_texture{0};
 };

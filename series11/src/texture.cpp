@@ -93,7 +93,7 @@ void Texture::SetTextureFormat(int width, int height, uint32_t format)
                  nullptr);
 }
 
-CubeTextureUPtr CubeTexture::CreateFromImages(const std::vector<Image *> images)
+CubeTextureUPtr CubeTexture::CreateFromImages(const std::vector<Image *> &images)
 {
     auto texture = CubeTextureUPtr(new CubeTexture());
     if (!texture->InitFromImages(images))
@@ -111,16 +111,19 @@ CubeTexture::~CubeTexture()
 
 void CubeTexture::Bind() const
 {
-    glBindTexture(GL_TEXTURE_CUBE_MAP, m_texture);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, m_texture); // GL_TEXTURE_CUBE_MAP으로 바인딩
 }
 
-bool CubeTexture::InitFromImages(const std::vector<Image *> images)
+bool CubeTexture::InitFromImages(const std::vector<Image *> &images)
 {
     glGenTextures(1, &m_texture);
     Bind();
 
+    // 텍스처 파라미터
+    // 리니어 필터링을 사용하여 텍스처를 확대 및 축소
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    // str 은 각각 s, t, r 축에 대한 텍스처 좌표를 설정
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
@@ -144,7 +147,7 @@ bool CubeTexture::InitFromImages(const std::vector<Image *> images)
             break;
         }
 
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB,
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, // positive_x, negative_x, positive_y, negative_y, positive_z, negative_z
                      image->GetWidth(), image->GetHeight(), 0,
                      format, GL_UNSIGNED_BYTE,
                      image->GetData());
