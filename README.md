@@ -27,14 +27,14 @@ $ ./빌드디렉터리/프로젝트이름
 
 | Seires                                                                                | Description                                             |
 | ------------------------------------------------------------------------------------- | ------------------------------------------------------- |
-| [series01](https://github.com/kcwww/Computer-Graphics-with-OpenGL/tree/main/series01) | Computer Graphics 를 실습하기 위한 개발환경 세팅입니다. |
-| [series02](https://github.com/kcwww/Computer-Graphics-with-OpenGL/tree/main/series02)  | OpenGL 을 활용한 GLFW 기초 예제입니다.                  |
-| [series03](https://github.com/kcwww/Computer-Graphics-with-OpenGL/tree/main/series03) | OpenGL 그래픽스 파이프라인 구축하기                     |
-| [series04](https://github.com/kcwww/Computer-Graphics-with-OpenGL/tree/main/series04) | shader 로 삼각형 그리기 (with. GLSL)                    |
-| [series05](https://github.com/kcwww/Computer-Graphics-with-OpenGL/tree/main/series05) | Texture in OpenGL                                       |
-| [series06](https://github.com/kcwww/Computer-Graphics-with-OpenGL/tree/main/series06) | 선형 변환을 이용한 큐브 그리기 (with. GLM)              |
-| [series07](https://github.com/kcwww/Computer-Graphics-with-OpenGL/tree/main/series07) | 카메라 조작과 GUI (with. ImGui)                         |
-| [series08](https://github.com/kcwww/Computer-Graphics-with-OpenGL/tree/main/series08) | OpenGL Lighting                                         |
-| [series09](https://github.com/kcwww/Computer-Graphics-with-OpenGL/tree/main/series09) | Light Casting && Object Loader                          |
-| [series10](https://github.com/kcwww/Computer-Graphics-with-OpenGL/tree/main/series10) | Depth, Stencil, Blending, Face Culling, Frame           |
-| [series11](https://github.com/kcwww/Computer-Graphics-with-OpenGL/tree/main/series11) | cubemap, advanced features, instancing, MSAA   |
+| [series01](https://www.chanwooyam.dev/series/computer-graphics/UrwA4nyOaiHdQveLgFzr) | Computer Graphics 를 실습하기 위한 개발환경 세팅입니다. |
+| [series02](https://www.chanwooyam.dev/series/computer-graphics/2IYzBkIto4h4tlnClmzU)  | OpenGL 을 활용한 GLFW 기초 예제입니다.                  |
+| [series03](https://www.chanwooyam.dev/series/computer-graphics/VK0ZR9QlvHlWjki8hTjU) | OpenGL 그래픽스 파이프라인 구축하기                     |
+| [series04](https://www.chanwooyam.dev/series/computer-graphics/fVIbKASs3Ayn5CVceXib) | shader 로 삼각형 그리기 (with. GLSL)                    |
+| [series05](https://www.chanwooyam.dev/series/computer-graphics/zBoqYzWQ3YGvqeYIw9ys) | Texture in OpenGL                                       |
+| [series06](https://www.chanwooyam.dev/series/computer-graphics/NgYLDbWuoY9j9L6iqlKn) | 선형 변환을 이용한 큐브 그리기 (with. GLM)              |
+| [series07](https://www.chanwooyam.dev/series/computer-graphics/jZZaHGOyDBOfHa9G5bCU) | 카메라 조작과 GUI (with. ImGui)                         |
+| [series08](https://www.chanwooyam.dev/series/computer-graphics/zpBh9McMrSBjB70OD0ov) | OpenGL Lighting                                         |
+| [series09](https://www.chanwooyam.dev/series/computer-graphics/P7639Qn0wvtL5zu78uo1) | Light Casting && Object Loader                          |
+| [series10](https://www.chanwooyam.dev/series/computer-graphics/4amHVR9Guak9LfYy6g2q) | Depth, Stencil, Blending, Face Culling, Frame           |
+| [series11](https://www.chanwooyam.dev/series/computer-graphics/BRGVTbTLHUnBWfiaZp4C) | cubemap, advanced features, instancing, MSAA   |
