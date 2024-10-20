@@ -125,7 +125,7 @@ void Context::Render()
     ImGui::End();
 
     // frame buffer 사용
-    m_framebuffer->Bind();
+    // m_framebuffer->Bind();
 
     // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
@@ -248,35 +248,46 @@ void Context::Render()
     // draw grass
     glEnable(GL_BLEND);
     glDisable(GL_CULL_FACE);
+    // m_grassProgram->Use();
+    // m_grassProgram->SetUniform("tex", 0);
+    // m_grassTexture->Bind();
+    // for (size_t i = 0; i < m_grassPos.size(); i++)
+    // {
+    //     modelTransform =
+    //         glm::translate(glm::mat4(1.0), glm::vec3(m_grassPos[i].x, 0.5f, m_grassPos[i].z)) *
+    //         glm::rotate(glm::mat4(1.0), m_grassPos[i].y, glm::vec3(0.0f, 1.0f, 0.0f));
+    //     transform = projection * view * modelTransform;
+    //     m_grassProgram->SetUniform("transform", transform);
+    //     m_plane->Draw(m_grassProgram.get());
+    // }
+
     m_grassProgram->Use();
     m_grassProgram->SetUniform("tex", 0);
     m_grassTexture->Bind();
-    for (size_t i = 0; i < m_grassPos.size(); i++)
-    {
-        modelTransform =
-            glm::translate(glm::mat4(1.0), glm::vec3(m_grassPos[i].x, 0.5f, m_grassPos[i].z)) *
-            glm::rotate(glm::mat4(1.0), m_grassPos[i].y, glm::vec3(0.0f, 1.0f, 0.0f));
-        transform = projection * view * modelTransform;
-        m_grassProgram->SetUniform("transform", transform);
-        m_plane->Draw(m_grassProgram.get());
-    }
+    m_grassInstance->Bind();
+    modelTransform = glm::translate(glm::mat4(1.0), glm::vec3(0.0f, 0.5f, 0.0f));
+    transform = projection * view * modelTransform;
+    m_grassProgram->SetUniform("transform", transform);
+    glDrawElementsInstanced(GL_TRIANGLES, m_plane->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, 0, m_grassPosBuffer->GetCount());
 
-    // 그림을 그리고 디폴트 화면으로 바인딩
-    Framebuffer::BindToDefault();
+    // // 그림을 그리고 디폴트 화면으로 바인딩
+    // Framebuffer::BindToDefault();
 
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-    m_postProgram->Use();
-    m_postProgram->SetUniform("transform",
-                              glm::scale(glm::mat4(1.0f), glm::vec3(2.0f, 2.0f, 1.0f)));
-    m_framebuffer->GetColorAttachment()->Bind();
-    m_postProgram->SetUniform("tex", 0);
-    m_postProgram->SetUniform("gamma", m_gamma); // gamma 설정
-    m_plane->Draw(m_postProgram.get());
+    // m_postProgram->Use();
+    // m_postProgram->SetUniform("transform",
+    //                           glm::scale(glm::mat4(1.0f), glm::vec3(2.0f, 2.0f, 1.0f)));
+    // m_framebuffer->GetColorAttachment()->Bind();
+    // m_postProgram->SetUniform("tex", 0);
+    // m_postProgram->SetUniform("gamma", m_gamma); // gamma 설정
+    // m_plane->Draw(m_postProgram.get());
 }
 
 bool Context::Init()
 {
+    glEnable(GL_MULTISAMPLE); // MSAA
+
     glEnable(GL_DEPTH_TEST);
     glClearColor(m_clearColor.r, m_clearColor.g, m_clearColor.b, m_clearColor.a);
 
@@ -298,16 +309,6 @@ bool Context::Init()
     m_postProgram = Program::Create("./shader/texture.vs", "./shader/gamma.fs");
     if (!m_postProgram)
         return false;
-
-    m_grassTexture = Texture::CreateFromImage(Image::Load("./image/grass.png").get());
-    m_grassProgram = Program::Create("./shader/grass.vs", "./shader/grass.fs");
-    m_grassPos.resize(10000);
-    for (size_t i = 0; i < m_grassPos.size(); i++)
-    {
-        m_grassPos[i].x = ((float)rand() / (float)RAND_MAX * 2.0f - 1.0f) * 5.0f;
-        m_grassPos[i].z = ((float)rand() / (float)RAND_MAX * 2.0f - 1.0f) * 5.0f;
-        m_grassPos[i].y = glm::radians((float)rand() / (float)RAND_MAX * 360.0f);
-    }
 
     m_material = Material::Create();
     m_material->diffuse = Texture::CreateFromImage(
@@ -366,6 +367,31 @@ bool Context::Init()
     m_envMapProgram = Program::Create("./shader/env_map.vs", "./shader/env_map.fs");
     if (!m_envMapProgram)
         return false;
+
+    // init grass
+    m_grassTexture = Texture::CreateFromImage(Image::Load("./image/grass.png").get());
+    m_grassProgram = Program::Create("./shader/grass.vs", "./shader/grass.fs");
+    m_grassPos.resize(10000);
+    for (size_t i = 0; i < m_grassPos.size(); i++)
+    {
+        m_grassPos[i].x = ((float)rand() / (float)RAND_MAX * 2.0f - 1.0f) * 5.0f;
+        m_grassPos[i].z = ((float)rand() / (float)RAND_MAX * 2.0f - 1.0f) * 5.0f;
+        m_grassPos[i].y = glm::radians((float)rand() / (float)RAND_MAX * 360.0f);
+    }
+    // instance grass
+    m_grassInstance = VertexLayout::Create();
+    m_grassInstance->Bind();
+    m_plane->GetVertexBuffer()->Bind();
+    m_grassInstance->SetAttrib(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);
+    m_grassInstance->SetAttrib(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), offsetof(Vertex, normal));
+    m_grassInstance->SetAttrib(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), offsetof(Vertex, texCoord));
+
+    m_grassPosBuffer = Buffer::CreateWithData(GL_ARRAY_BUFFER, GL_STATIC_DRAW, m_grassPos.data(), sizeof(glm::vec3), m_grassPos.size());
+    m_grassPosBuffer->Bind();
+    m_grassInstance->SetAttrib(3, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), 0);
+    glVertexAttribDivisor(3, 1); // instance data로 사용할 버퍼를 1로 설정
+    m_plane->GetIndexBuffer()->Bind();
+
     SPDLOG_INFO("context init success");
     return true;
 }
