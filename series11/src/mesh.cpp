@@ -140,7 +140,7 @@ void Mesh::Init(
         GL_ARRAY_BUFFER, GL_STATIC_DRAW,
         vertices.data(), sizeof(Vertex), vertices.size());
     m_indexBuffer = Buffer::CreateWithData(
-        GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW,
+        GL_ELEMENT_ARRAY_BUFFER, GL_DYNAMIC_DRAW, // dynamic draw 는 수정이 가능한 버퍼
         indices.data(), sizeof(uint32_t), indices.size());
     m_vertexLayout->SetAttrib(0, 3, GL_FLOAT, false, sizeof(Vertex), 0);
     m_vertexLayout->SetAttrib(1, 3, GL_FLOAT, false, sizeof(Vertex), offsetof(Vertex, normal));
