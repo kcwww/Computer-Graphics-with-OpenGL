@@ -87,6 +87,11 @@ private:
     CubeTextureUPtr m_cubeTexture;
     ProgramUPtr m_skyboxProgram;
     ProgramUPtr m_envMapProgram;
+
+    // grass
+    TexturePtr m_grassTexture;
+    ProgramUPtr m_grassProgram;
+    std::vector<glm::vec3> m_grassPos;
 };
 
 #endif // __CONTEXT_H__

@@ -245,6 +245,22 @@ void Context::Render()
     m_envMapProgram->SetUniform("skybox", 0);
     m_box->Draw(m_envMapProgram.get());
 
+    // draw grass
+    glEnable(GL_BLEND);
+    glDisable(GL_CULL_FACE);
+    m_grassProgram->Use();
+    m_grassProgram->SetUniform("tex", 0);
+    m_grassTexture->Bind();
+    for (size_t i = 0; i < m_grassPos.size(); i++)
+    {
+        modelTransform =
+            glm::translate(glm::mat4(1.0), glm::vec3(m_grassPos[i].x, 0.5f, m_grassPos[i].z)) *
+            glm::rotate(glm::mat4(1.0), m_grassPos[i].y, glm::vec3(0.0f, 1.0f, 0.0f));
+        transform = projection * view * modelTransform;
+        m_grassProgram->SetUniform("transform", transform);
+        m_plane->Draw(m_grassProgram.get());
+    }
+
     // 그림을 그리고 디폴트 화면으로 바인딩
     Framebuffer::BindToDefault();
 
@@ -282,6 +298,16 @@ bool Context::Init()
     m_postProgram = Program::Create("./shader/texture.vs", "./shader/gamma.fs");
     if (!m_postProgram)
         return false;
+
+    m_grassTexture = Texture::CreateFromImage(Image::Load("./image/grass.png").get());
+    m_grassProgram = Program::Create("./shader/grass.vs", "./shader/grass.fs");
+    m_grassPos.resize(10000);
+    for (size_t i = 0; i < m_grassPos.size(); i++)
+    {
+        m_grassPos[i].x = ((float)rand() / (float)RAND_MAX * 2.0f - 1.0f) * 5.0f;
+        m_grassPos[i].z = ((float)rand() / (float)RAND_MAX * 2.0f - 1.0f) * 5.0f;
+        m_grassPos[i].y = glm::radians((float)rand() / (float)RAND_MAX * 360.0f);
+    }
 
     m_material = Material::Create();
     m_material->diffuse = Texture::CreateFromImage(
