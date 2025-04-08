@@ -10,6 +10,7 @@
 #include "mesh.h"
 #include "model.h"
 #include "framebuffer.h"
+#include "shadow_map.h"
 
 CLASS_PTR(Context)
 class Context
@@ -45,6 +46,9 @@ private:
     MeshUPtr m_plane;
     TexturePtr m_windowTexture;
 
+    /// shadow map
+    ShadowMapUPtr m_shadowMap;
+
     int m_width{640};
     int m_height{480};
 
@@ -57,10 +61,10 @@ private:
     // light parameter
     struct Light
     {
-        glm::vec3 position{glm::vec3(1.0f, 4.0f, 4.0f)};
-        glm::vec3 direction{glm::vec3(-1.0f, -1.0f, -1.0f)};
-        glm::vec2 cutoff{glm::vec2(120.0f, 5.0f)};
-        float distance{128.0f};
+        glm::vec3 position{glm::vec3(2.0f, 4.0f, 4.0f)};
+        glm::vec3 direction{glm::vec3(-0.5f, -1.5f, -1.0f)};
+        glm::vec2 cutoff{glm::vec2(50.0f, 5.0f)};
+        float distance{150.0f};
         glm::vec3 ambient{glm::vec3(0.1f, 0.1f, 0.1f)};
         glm::vec3 diffuse{glm::vec3(0.8f, 0.8f, 0.8f)};
         glm::vec3 specular{glm::vec3(1.0f, 1.0f, 1.0f)};
@@ -68,7 +72,7 @@ private:
     Light m_light;
     bool m_flashLightMode{false};
     // blinn
-    bool m_blinn{false};
+    bool m_blinn{true};
 
     // material parameter
     MaterialPtr m_material;

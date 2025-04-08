@@ -153,6 +153,10 @@ void Context::Render()
 
         ImGui::Checkbox("animation", &m_animation);
 
+        // shadow map depth 확인
+        ImGui::Image((ImTextureID)m_shadowMap->GetShadowMap()->Get(),
+                     ImVec2(256, 256), ImVec2(0, 1), ImVec2(1, 0));
+
         if (ImGui::ColorEdit4("clear color", glm::value_ptr(m_clearColor)))
         {
             glClearColor(m_clearColor.r, m_clearColor.g, m_clearColor.b, m_clearColor.a);
@@ -172,11 +176,30 @@ void Context::Render()
     }
     ImGui::End();
 
+    //  shadow map render 1st pass
+    auto lightView = glm::lookAt(m_light.position,
+                                 m_light.position + m_light.direction,
+                                 glm::vec3(0.0f, 1.0f, 0.0f)); // 빛 방향으로부터 view matrix 생성
+    auto lightProjection = glm::perspective(glm::radians((m_light.cutoff[0] + m_light.cutoff[1]) * 2.0f),
+                                            1.0f, 1.0f, 20.0f); // 빛의 시야각을 이용하여 projection matrix 생성
+    m_shadowMap->Bind();                                        // shadow map framebuffer 바인딩
+    glClear(GL_DEPTH_BUFFER_BIT);                               // 깊이 버퍼 초기화
+    glViewport(0, 0,
+               m_shadowMap->GetShadowMap()->GetWidth(),
+               m_shadowMap->GetShadowMap()->GetHeight());                    // shadow map 크기로 viewport 설정
+    m_simpleProgram->Use();                                                  // shadow map을 위한 shader 사용
+    m_simpleProgram->SetUniform("color", glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)); // 색상 설정
+    DrawScene(lightView, lightProjection, m_simpleProgram.get());            // 장면 그리기
+
+    Framebuffer::BindToDefault();        // default framebuffer 바인딩
+    glViewport(0, 0, m_width, m_height); // 원래 viewport 크기로 설정
+
     // frame buffer 사용
     // m_framebuffer->Bind();
 
     // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    glEnable(GL_DEPTH_TEST);
 
     m_cameraFront =
         glm::rotate(glm::mat4(1.0f),
@@ -344,6 +367,8 @@ bool Context::Init()
     m_grassInstance->SetAttrib(3, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), 0);
     glVertexAttribDivisor(3, 1); // instance data로 사용할 버퍼를 1로 설정
     m_plane->GetIndexBuffer()->Bind();
+
+    m_shadowMap = ShadowMap::Create(1024, 1024);
 
     SPDLOG_INFO("context init success");
     return true;
