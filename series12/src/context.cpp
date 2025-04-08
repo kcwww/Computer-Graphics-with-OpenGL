@@ -96,6 +96,8 @@ void Context::Render()
             ImGui::ColorEdit3("l.diffuse", glm::value_ptr(m_light.diffuse));
             ImGui::ColorEdit3("l.specular", glm::value_ptr(m_light.specular));
             ImGui::Checkbox("flash light mode", &m_flashLightMode);
+            // blinn check
+            ImGui::Checkbox("l.blinn", &m_blinn);
         }
 
         if (ImGui::CollapsingHeader("material", ImGuiTreeNodeFlags_DefaultOpen))
@@ -182,6 +184,8 @@ void Context::Render()
     m_program->SetUniform("light.ambient", m_light.ambient);
     m_program->SetUniform("light.diffuse", m_light.diffuse);
     m_program->SetUniform("light.specular", m_light.specular);
+    // blinn
+    m_program->SetUniform("blinn", (m_blinn ? 1 : 0));
 
     auto modelTransform =
         glm::translate(glm::mat4(1.0), glm::vec3(0.0f, -0.5f, 0.0f)) *
@@ -212,64 +216,6 @@ void Context::Render()
     m_program->SetUniform("modelTransform", modelTransform);
     m_box2Material->SetToProgram(m_program.get());
     m_box->Draw(m_program.get());
-
-    // make blending window
-    glEnable(GL_BLEND);                                // blending 활성화
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // blending 방식 설정 (src * src_alpha + dest * (1 - src_alpha))
-
-    m_textureProgram->Use();
-    m_windowTexture->Bind();
-    m_textureProgram->SetUniform("tex", 0);
-
-    modelTransform =
-        glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.5f, 4.0f));
-    transform = projection * view * modelTransform;
-    m_textureProgram->SetUniform("transform", transform);
-    m_plane->Draw(m_textureProgram.get());
-    modelTransform =
-        glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 1.0f, 6.0f));
-    transform = projection * view * modelTransform;
-    m_textureProgram->SetUniform("transform", transform);
-    m_plane->Draw(m_textureProgram.get());
-
-    modelTransform =
-        glm::translate(glm::mat4(1.0f), glm::vec3(1.0f, 0.75f, -2.0f)) *
-        glm::rotate(glm::mat4(1.0), glm::radians(40.0f), glm::vec3(0.0f, 1.0f, 0.0f)) *
-        glm::scale(glm::mat4(1.0), glm::vec3(1.5f));
-    m_envMapProgram->Use();
-    m_envMapProgram->SetUniform("model", modelTransform);
-    m_envMapProgram->SetUniform("view", view);
-    m_envMapProgram->SetUniform("projection", projection);
-    m_envMapProgram->SetUniform("cameraPos", m_cameraPos);
-    m_cubeTexture->Bind();
-    m_envMapProgram->SetUniform("skybox", 0);
-    m_box->Draw(m_envMapProgram.get());
-
-    // draw grass
-    glEnable(GL_BLEND);
-    glDisable(GL_CULL_FACE);
-
-    m_grassProgram->Use();
-    m_grassProgram->SetUniform("tex", 0);
-    m_grassTexture->Bind();
-    m_grassInstance->Bind();
-    modelTransform = glm::translate(glm::mat4(1.0), glm::vec3(0.0f, 0.5f, 0.0f));
-    transform = projection * view * modelTransform;
-    m_grassProgram->SetUniform("transform", transform);
-    glDrawElementsInstanced(GL_TRIANGLES, m_plane->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, 0, m_grassPosBuffer->GetCount());
-
-    // // 그림을 그리고 디폴트 화면으로 바인딩
-    // Framebuffer::BindToDefault();
-
-    // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
-    // m_postProgram->Use();
-    // m_postProgram->SetUniform("transform",
-    //                           glm::scale(glm::mat4(1.0f), glm::vec3(2.0f, 2.0f, 1.0f)));
-    // m_framebuffer->GetColorAttachment()->Bind();
-    // m_postProgram->SetUniform("tex", 0);
-    // m_postProgram->SetUniform("gamma", m_gamma); // gamma 설정
-    // m_plane->Draw(m_postProgram.get());
 }
 
 bool Context::Init()
@@ -320,7 +266,7 @@ bool Context::Init()
     m_planeMaterial->diffuse = Texture::CreateFromImage(
         Image::Load("./image/marble.jpg").get());
     m_planeMaterial->specular = grayTexture;
-    m_planeMaterial->shininess = 128.0f;
+    m_planeMaterial->shininess = 4.0f;
 
     m_box1Material = Material::Create();
     m_box1Material->diffuse = Texture::CreateFromImage(

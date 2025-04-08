@@ -62,6 +62,8 @@ private:
     };
     Light m_light;
     bool m_flashLightMode{false};
+    // blinn
+    bool m_blinn{false};
 
     // material parameter
     MaterialPtr m_material;

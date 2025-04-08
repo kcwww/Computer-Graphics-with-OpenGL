@@ -23,6 +23,7 @@ struct Material {
     float shininess;
 };
 uniform Material material;
+uniform int blinn;
 
 void main() {
     vec3 texColor = texture2D(material.diffuse, texCoord).xyz;
@@ -44,10 +45,26 @@ void main() {
         float diff = max(dot(pixelNorm, lightDir), 0.0);
         vec3 diffuse = diff * texColor * light.diffuse;
 
+
+        // 기존 phong-shading 코드
+        // vec3 specColor = texture2D(material.specular, texCoord).xyz;
+        // vec3 viewDir = normalize(viewPos - position);
+        // vec3 reflectDir = reflect(-lightDir, pixelNorm);
+        // float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
+        // vec3 specular = spec * specColor * light.specular;
+
+        // blinn-phong shading 코드
         vec3 specColor = texture2D(material.specular, texCoord).xyz;
-        vec3 viewDir = normalize(viewPos - position);
-        vec3 reflectDir = reflect(-lightDir, pixelNorm);
-        float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
+        float spec = 0.0;
+        if (blinn == 0) { // blinn이 0이면 기존 phong-shading 사용
+            vec3 viewDir = normalize(viewPos - position);
+            vec3 reflectDir = reflect(-lightDir, pixelNorm);
+            spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
+        } else { 
+            vec3 viewDir = normalize(viewPos - position);
+            vec3 halfDir = normalize(lightDir + viewDir); // 반사벡터 대신 빛과 카메라 방향의 평균을 사용
+            spec = pow(max(dot(halfDir, pixelNorm), 0.0), material.shininess);
+        }
         vec3 specular = spec * specColor * light.specular;
 
         result += (diffuse + specular) * intensity; // intensity를 곱하여 빛의 강도를 조절
