@@ -1,10 +1,10 @@
 #include "texture.h"
 
-TextureUPtr Texture::Create(int width, int height, uint32_t format)
+TextureUPtr Texture::Create(int width, int height, uint32_t format, uint32_t type)
 {
     auto texture = TextureUPtr(new Texture());
     texture->CreateTexture();
-    texture->SetTextureFormat(width, height, format);
+    texture->SetTextureFormat(width, height, format, type);
     texture->SetFilter(GL_LINEAR, GL_LINEAR);
     return std::move(texture);
 }
@@ -72,24 +72,26 @@ void Texture::SetTextureFromImage(const Image *image)
     m_width = image->GetWidth();
     m_height = image->GetHeight();
     m_format = format;
+    m_type = GL_UNSIGNED_BYTE;
 
     glTexImage2D(GL_TEXTURE_2D, 0, m_format,
                  m_width, m_height, 0,
-                 format, GL_UNSIGNED_BYTE,
+                 format, m_type,
                  image->GetData());
 
     glGenerateMipmap(GL_TEXTURE_2D);
 }
 
-void Texture::SetTextureFormat(int width, int height, uint32_t format)
+void Texture::SetTextureFormat(int width, int height, uint32_t format, uint32_t type)
 {
     m_width = width;
     m_height = height;
     m_format = format;
+    m_type = type;
 
     glTexImage2D(GL_TEXTURE_2D, 0, m_format,
                  m_width, m_height, 0,
-                 format, GL_UNSIGNED_BYTE,
+                 format, m_type,
                  nullptr);
 }
 
