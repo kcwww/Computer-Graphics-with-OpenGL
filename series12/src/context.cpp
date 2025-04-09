@@ -144,6 +144,7 @@ void Context::Render()
             ImGui::Checkbox("flash light mode", &m_flashLightMode);
             // blinn check
             ImGui::Checkbox("l.blinn", &m_blinn);
+            ImGui::Checkbox("l.directional", &m_light.directional);
         }
 
         if (ImGui::CollapsingHeader("material", ImGuiTreeNodeFlags_DefaultOpen))
@@ -180,10 +181,15 @@ void Context::Render()
     auto lightView = glm::lookAt(m_light.position,
                                  m_light.position + m_light.direction,
                                  glm::vec3(0.0f, 1.0f, 0.0f)); // 빛 방향으로부터 view matrix 생성
-    auto lightProjection = glm::perspective(glm::radians((m_light.cutoff[0] + m_light.cutoff[1]) * 2.0f),
-                                            1.0f, 1.0f, 20.0f); // 빛의 시야각을 이용하여 projection matrix 생성
-    m_shadowMap->Bind();                                        // shadow map framebuffer 바인딩
-    glClear(GL_DEPTH_BUFFER_BIT);                               // 깊이 버퍼 초기화
+
+    auto lightProjection = m_light.directional
+                               ? glm::ortho(-10.0f, 10.0f,
+                                            -10.0f, 10.0f,
+                                            1.0f, 30.0f)
+                               : glm::perspective(glm::radians((m_light.cutoff[0] + m_light.cutoff[1]) * 2.0f),
+                                                  1.0f, 1.0f, 20.0f); // 빛의 시야각을 이용하여 projection matrix 생성
+    m_shadowMap->Bind();                                              // shadow map framebuffer 바인딩
+    glClear(GL_DEPTH_BUFFER_BIT);                                     // 깊이 버퍼 초기화
     glViewport(0, 0,
                m_shadowMap->GetShadowMap()->GetWidth(),
                m_shadowMap->GetShadowMap()->GetHeight());                    // shadow map 크기로 viewport 설정
@@ -263,6 +269,7 @@ void Context::Render()
     // shadow map을 위한 shader 사용
     m_lightShadowProgram->Use();
     m_lightShadowProgram->SetUniform("viewPos", m_cameraPos);
+    m_lightShadowProgram->SetUniform("light.directional", m_light.directional ? 1 : 0);
     m_lightShadowProgram->SetUniform("light.position", lightPos);
     m_lightShadowProgram->SetUniform("light.direction", lightDir);
     m_lightShadowProgram->SetUniform("light.cutoff", glm::vec2(
