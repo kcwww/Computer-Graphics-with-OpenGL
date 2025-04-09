@@ -28,7 +28,7 @@ bool ShadowMap::Init(int width, int height)
 
   m_shadowMap = Texture::Create(width, height, GL_DEPTH_COMPONENT, GL_FLOAT); // 깊이 텍스처 생성, depth component 사용
   m_shadowMap->SetFilter(GL_NEAREST, GL_NEAREST);                             // 필터링 설정
-  m_shadowMap->SetWrap(GL_REPEAT, GL_REPEAT);                                 // 래핑 설정
+  m_shadowMap->SetWrap(GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER);               // 래핑 설정
 
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
                          GL_TEXTURE_2D, m_shadowMap->Get(), 0); // 깊이 텍스처를 프레임버퍼에 바인딩

@@ -90,7 +90,7 @@ void Context::DrawScene(const glm::mat4 &view,
     program->Use();
     auto modelTransform =
         glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -0.5f, 0.0f)) *
-        glm::scale(glm::mat4(1.0f), glm::vec3(10.0f, 1.0f, 10.0f));
+        glm::scale(glm::mat4(1.0f), glm::vec3(40.0f, 1.0f, 40.0f)); // 지면
     auto transform = projection * view * modelTransform;
     program->SetUniform("transform", transform);
     program->SetUniform("modelTransform", modelTransform);
