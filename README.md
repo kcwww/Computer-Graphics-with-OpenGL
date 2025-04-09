@@ -38,3 +38,4 @@ $ ./빌드디렉터리/프로젝트이름
 | [series09](https://www.chanwooyam.dev/series/computer-graphics/P7639Qn0wvtL5zu78uo1) | Light Casting && Object Loader                          |
 | [series10](https://www.chanwooyam.dev/series/computer-graphics/4amHVR9Guak9LfYy6g2q) | Depth, Stencil, Blending, Face Culling, Frame           |
 | [series11](https://www.chanwooyam.dev/series/computer-graphics/BRGVTbTLHUnBWfiaZp4C) | cubemap, advanced features, instancing, MSAA   |
+| [series12](https://www.chanwooyam.dev/series/computer-graphics/tgqoUvnES4qRh4X0xnVD) | Blinn-Phong Shading && Shadow Mapping   |
