@@ -242,22 +242,45 @@ void Context::Render()
         m_box->Draw(m_simpleProgram.get());
     }
 
-    m_program->Use();
-    m_program->SetUniform("viewPos", m_cameraPos);
-    m_program->SetUniform("light.position", lightPos);
-    m_program->SetUniform("light.direction", lightDir);
-    m_program->SetUniform("light.cutoff", glm::vec2(
-                                              cosf(glm::radians(m_light.cutoff[0])),
-                                              cosf(glm::radians(m_light.cutoff[0] + m_light.cutoff[1]))));
-    m_program->SetUniform("light.attenuation", GetAttenuationCoeff(m_light.distance));
-    m_program->SetUniform("light.ambient", m_light.ambient);
-    m_program->SetUniform("light.diffuse", m_light.diffuse);
-    m_program->SetUniform("light.specular", m_light.specular);
-    // blinn
-    m_program->SetUniform("blinn", (m_blinn ? 1 : 0));
+    // 기존 lighting shader 사용
+    // m_program->Use();
+    // m_program->SetUniform("viewPos", m_cameraPos);
+    // m_program->SetUniform("light.position", lightPos);
+    // m_program->SetUniform("light.direction", lightDir);
+    // m_program->SetUniform("light.cutoff", glm::vec2(
+    //                                           cosf(glm::radians(m_light.cutoff[0])),
+    //                                           cosf(glm::radians(m_light.cutoff[0] + m_light.cutoff[1]))));
+    // m_program->SetUniform("light.attenuation", GetAttenuationCoeff(m_light.distance));
+    // m_program->SetUniform("light.ambient", m_light.ambient);
+    // m_program->SetUniform("light.diffuse", m_light.diffuse);
+    // m_program->SetUniform("light.specular", m_light.specular);
+    // // blinn
+    // m_program->SetUniform("blinn", (m_blinn ? 1 : 0));
 
-    // draw scene
-    DrawScene(view, projection, m_program.get());
+    // // draw scene
+    // DrawScene(view, projection, m_program.get());
+
+    // shadow map을 위한 shader 사용
+    m_lightShadowProgram->Use();
+    m_lightShadowProgram->SetUniform("viewPos", m_cameraPos);
+    m_lightShadowProgram->SetUniform("light.position", lightPos);
+    m_lightShadowProgram->SetUniform("light.direction", lightDir);
+    m_lightShadowProgram->SetUniform("light.cutoff", glm::vec2(
+                                                         cosf(glm::radians(m_light.cutoff[0])),
+                                                         cosf(glm::radians(m_light.cutoff[0] + m_light.cutoff[1]))));
+    m_lightShadowProgram->SetUniform("light.attenuation", GetAttenuationCoeff(m_light.distance));
+    m_lightShadowProgram->SetUniform("light.ambient", m_light.ambient);
+    m_lightShadowProgram->SetUniform("light.diffuse", m_light.diffuse);
+    m_lightShadowProgram->SetUniform("light.specular", m_light.specular);
+    m_lightShadowProgram->SetUniform("blinn", (m_blinn ? 1 : 0));
+    m_lightShadowProgram->SetUniform("lightTransform", lightProjection * lightView);
+    glActiveTexture(GL_TEXTURE3); // 3번 텍스처 슬롯을 사용하는 이유는
+                                  // shadow map을 3번 슬롯에 바인딩하기 때문
+    m_shadowMap->GetShadowMap()->Bind();
+    m_lightShadowProgram->SetUniform("shadowMap", 3);
+    glActiveTexture(GL_TEXTURE0);
+
+    DrawScene(view, projection, m_lightShadowProgram.get());
 }
 
 bool Context::Init()
@@ -369,6 +392,8 @@ bool Context::Init()
     m_plane->GetIndexBuffer()->Bind();
 
     m_shadowMap = ShadowMap::Create(1024, 1024);
+    m_lightShadowProgram = Program::Create("./shader/lighting_shadow.vs",
+                                           "./shader/lighting_shadow.fs");
 
     SPDLOG_INFO("context init success");
     return true;

@@ -48,6 +48,7 @@ private:
 
     /// shadow map
     ShadowMapUPtr m_shadowMap;
+    ProgramUPtr m_lightShadowProgram;
 
     int m_width{640};
     int m_height{480};
