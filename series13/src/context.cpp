@@ -248,24 +248,6 @@ void Context::Render()
         m_box->Draw(m_simpleProgram.get());
     }
 
-    // 기존 lighting shader 사용
-    // m_program->Use();
-    // m_program->SetUniform("viewPos", m_cameraPos);
-    // m_program->SetUniform("light.position", lightPos);
-    // m_program->SetUniform("light.direction", lightDir);
-    // m_program->SetUniform("light.cutoff", glm::vec2(
-    //                                           cosf(glm::radians(m_light.cutoff[0])),
-    //                                           cosf(glm::radians(m_light.cutoff[0] + m_light.cutoff[1]))));
-    // m_program->SetUniform("light.attenuation", GetAttenuationCoeff(m_light.distance));
-    // m_program->SetUniform("light.ambient", m_light.ambient);
-    // m_program->SetUniform("light.diffuse", m_light.diffuse);
-    // m_program->SetUniform("light.specular", m_light.specular);
-    // // blinn
-    // m_program->SetUniform("blinn", (m_blinn ? 1 : 0));
-
-    // // draw scene
-    // DrawScene(view, projection, m_program.get());
-
     // shadow map을 위한 shader 사용
     m_lightShadowProgram->Use();
     m_lightShadowProgram->SetUniform("viewPos", m_cameraPos);
@@ -288,6 +270,27 @@ void Context::Render()
     glActiveTexture(GL_TEXTURE0);
 
     DrawScene(view, projection, m_lightShadowProgram.get());
+
+    // normal map
+    auto modelTransform =
+        glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 3.0f, 0.0f));
+    m_normalProgram->Use();
+    m_normalProgram->SetUniform("viewPos", m_cameraPos);
+    m_normalProgram->SetUniform("lightPos", m_light.position);
+
+    glActiveTexture(GL_TEXTURE0);
+    m_brickDiffuseTexture->Bind();
+    m_normalProgram->SetUniform("diffuse", 0);
+
+    glActiveTexture(GL_TEXTURE1);
+    m_brickNormalTexture->Bind();
+    m_normalProgram->SetUniform("normalMap", 1);
+
+    glActiveTexture(GL_TEXTURE0);
+    m_normalProgram->SetUniform("modelTransform", modelTransform);
+    m_normalProgram->SetUniform("transform", projection * view * modelTransform);
+
+    m_plane->Draw(m_normalProgram.get());
 }
 
 bool Context::Init()
@@ -398,9 +401,23 @@ bool Context::Init()
     glVertexAttribDivisor(3, 1); // instance data로 사용할 버퍼를 1로 설정
     m_plane->GetIndexBuffer()->Bind();
 
+    // shadow map
     m_shadowMap = ShadowMap::Create(1024, 1024);
     m_lightShadowProgram = Program::Create("./shader/lighting_shadow.vs",
                                            "./shader/lighting_shadow.fs");
+
+    // normal map
+    m_brickDiffuseTexture = Texture::CreateFromImage(
+        Image::Load("./image/brickwall.jpg", false).get()); // false 는 flip y
+    m_brickNormalTexture = Texture::CreateFromImage(
+        Image::Load("./image/brickwall_normal.jpg", false).get());
+    m_normalProgram = Program::Create("./shader/normal.vs",
+                                      "./shader/normal.fs");
+    if (!m_normalProgram)
+    {
+        SPDLOG_ERROR("normal program init failed");
+        return false;
+    }
 
     SPDLOG_INFO("context init success");
     return true;

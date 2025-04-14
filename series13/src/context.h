@@ -50,6 +50,11 @@ private:
     ShadowMapUPtr m_shadowMap;
     ProgramUPtr m_lightShadowProgram;
 
+    // normal map
+    TextureUPtr m_brickDiffuseTexture;
+    TextureUPtr m_brickNormalTexture;
+    ProgramUPtr m_normalProgram;
+
     int m_width{640};
     int m_height{480};
 
