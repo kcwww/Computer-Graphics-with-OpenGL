@@ -9,9 +9,10 @@
 
 struct Vertex
 {
-    glm::vec3 position;
-    glm::vec3 normal;
-    glm::vec2 texCoord;
+    glm::vec3 position; // position 은 3D 좌표
+    glm::vec3 normal;   // normal 은 3D normal vector
+    glm::vec2 texCoord; // texCoord 은 2D texture coordinate
+    glm::vec3 tangent;  // tangent 은 3D tangent vector
 };
 
 CLASS_PTR(Material);
@@ -54,6 +55,10 @@ public:
     void SetMaterial(MaterialPtr material) { m_material = material; }
     MaterialPtr GetMaterial() const { return m_material; }
     void Draw(const Program *program) const;
+
+    // compute tangent space
+    static void ComputeTangents(std::vector<Vertex> &vertices,
+                                const std::vector<uint32_t> &indices);
 
 private:
     Mesh() {}
