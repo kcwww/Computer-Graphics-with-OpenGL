@@ -135,6 +135,12 @@ void Mesh::Init(
     const std::vector<uint32_t> &indices,
     uint32_t primitiveType)
 {
+    // primitiveType 설정
+    if (primitiveType == GL_TRIANGLES)
+    {
+        ComputeTangents(const_cast<std::vector<Vertex> &>(vertices), indices);
+    }
+
     m_vertexLayout = VertexLayout::Create();
     m_vertexBuffer = Buffer::CreateWithData(
         GL_ARRAY_BUFFER, GL_STATIC_DRAW,
@@ -145,6 +151,9 @@ void Mesh::Init(
     m_vertexLayout->SetAttrib(0, 3, GL_FLOAT, false, sizeof(Vertex), 0);
     m_vertexLayout->SetAttrib(1, 3, GL_FLOAT, false, sizeof(Vertex), offsetof(Vertex, normal));
     m_vertexLayout->SetAttrib(2, 2, GL_FLOAT, false, sizeof(Vertex), offsetof(Vertex, texCoord));
+
+    // tangent vector 추가
+    m_vertexLayout->SetAttrib(3, 3, GL_FLOAT, false, sizeof(Vertex), offsetof(Vertex, tangent));
 }
 
 // program 에 VAO 바인딩 후 draw call
