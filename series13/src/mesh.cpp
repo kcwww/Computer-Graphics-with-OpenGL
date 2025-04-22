@@ -135,7 +135,7 @@ void Mesh::Init(
     const std::vector<uint32_t> &indices,
     uint32_t primitiveType)
 {
-    // primitiveType 설정
+    // primitiveType 가 GL_TRIANGLES 일 때만 tangent vector 계산
     if (primitiveType == GL_TRIANGLES)
     {
         ComputeTangents(const_cast<std::vector<Vertex> &>(vertices), indices);
