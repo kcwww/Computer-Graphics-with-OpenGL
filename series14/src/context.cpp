@@ -39,7 +39,7 @@ void Context::Reshape(int width, int height)
     m_height = height;
     glViewport(0, 0, m_width, m_height);
 
-    m_framebuffer = Framebuffer::Create(Texture::Create(std::max(1, width), std::max(1, height), GL_RGBA)); // 화면이 리사이징 될때 framebuffer도 리사이징
+    m_framebuffer = Framebuffer::Create({Texture::Create(std::max(1, width), std::max(1, height), GL_RGBA)}); // 화면이 리사이징 될때 framebuffer도 리사이징
 }
 
 void Context::MouseMove(double x, double y)
