@@ -40,4 +40,5 @@ $ ./빌드디렉터리/프로젝트이름
 | [series11](https://www.chanwooyam.dev/series/computer-graphics/BRGVTbTLHUnBWfiaZp4C) | cubemap, advanced features, instancing, MSAA   |
 | [series12](https://www.chanwooyam.dev/series/computer-graphics/tgqoUvnES4qRh4X0xnVD) | Blinn-Phong Shading && Shadow Mapping   |
 | [series13](https://www.chanwooyam.dev/series/computer-graphics/7HQnb5V4oUbUJtZIhx5K) | Normal Mapping && HDR, Bloom   |
+| [series14](https://www.chanwooyam.dev/series/computer-graphics/F5biIb2Dfq733w70u0g7) | Deferred shading  |
 
