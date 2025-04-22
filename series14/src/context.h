@@ -101,6 +101,10 @@ private:
     // frame buffer
     FramebufferUPtr m_framebuffer;
 
+    // deferred shading
+    FramebufferUPtr m_deferGeoFramebuffer;
+    ProgramUPtr m_deferGeoProgram;
+
     // cubemap
     CubeTextureUPtr m_cubeTexture;
     ProgramUPtr m_skyboxProgram;
