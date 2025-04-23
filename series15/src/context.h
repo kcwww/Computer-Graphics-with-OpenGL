@@ -126,6 +126,11 @@ private:
     // instancing
     BufferUPtr m_grassPosBuffer;
     VertexLayoutUPtr m_grassInstance;
+
+    // ssao
+    FramebufferUPtr m_ssaoFramebuffer;
+    ProgramUPtr m_ssaoProgram;
+    ModelUPtr m_model; // for test rendering
 };
 
 #endif // __CONTEXT_H__
