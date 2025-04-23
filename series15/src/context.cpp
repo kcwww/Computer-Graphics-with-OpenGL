@@ -47,6 +47,9 @@ void Context::Reshape(int width, int height)
 
     // ssao
     m_ssaoFramebuffer = Framebuffer::Create({Texture::Create(width, height, GL_RED)}); // ssao framebuffer 1 채널
+
+    // ssao blur
+    m_ssaoBlurFramebuffer = Framebuffer::Create({Texture::Create(width, height, GL_RED)}); // ssao blur framebuffer 1 채널
 }
 
 void Context::MouseMove(double x, double y)
@@ -162,7 +165,12 @@ void Context::Render()
             // blinn check
             ImGui::Checkbox("l.blinn", &m_blinn);
             ImGui::Checkbox("l.directional", &m_light.directional);
+
+            // ssao radius
             ImGui::DragFloat("ssao radius", &m_ssaoRadius, 0.01f, 0.0f, 5.0f);
+
+            // ssao use
+            ImGui::Checkbox("use ssao", &m_useSsao);
         }
 
         if (ImGui::CollapsingHeader("material", ImGuiTreeNodeFlags_DefaultOpen))
@@ -215,11 +223,25 @@ void Context::Render()
     // ssao imgui
     if (ImGui::Begin("SSAO"))
     {
+        const char *bufferNames[] = {"original", "blurred"};
+        static int bufferSelect = 0;
+        ImGui::Combo("buffer", &bufferSelect, bufferNames, 2);
+
         float width = ImGui::GetContentRegionAvailWidth();
         float height = width * ((float)m_height / (float)m_width);
-        ImGui::Image((ImTextureID)m_ssaoFramebuffer->GetColorAttachment()->Get(), ImVec2(width, height), ImVec2(0, 1), ImVec2(1, 0));
+        auto selectedAttachment = bufferSelect == 0 ? m_ssaoFramebuffer->GetColorAttachment() : m_ssaoBlurFramebuffer->GetColorAttachment();
+        ImGui::Image((ImTextureID)selectedAttachment->Get(), ImVec2(width, height), ImVec2(0, 1), ImVec2(1, 0));
     }
     ImGui::End();
+
+    // // ssao imgui
+    // if (ImGui::Begin("SSAO"))
+    // {
+    //     float width = ImGui::GetContentRegionAvailWidth();
+    //     float height = width * ((float)m_height / (float)m_width);
+    //     ImGui::Image((ImTextureID)m_ssaoFramebuffer->GetColorAttachment()->Get(), ImVec2(width, height), ImVec2(0, 1), ImVec2(1, 0));
+    // }
+    // ImGui::End();
 
     m_cameraFront =
         glm::rotate(glm::mat4(1.0f),
@@ -300,6 +322,16 @@ void Context::Render()
     m_ssaoProgram->SetUniform("projection", projection);
     m_plane->Draw(m_ssaoProgram.get());
 
+    // ssao blur pass
+    m_ssaoBlurFramebuffer->Bind();
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glViewport(0, 0, m_width, m_height);
+    m_blurProgram->Use();
+    m_ssaoFramebuffer->GetColorAttachment(0)->Bind(); // ssao framebuffer
+    m_blurProgram->SetUniform("tex", 0);
+    m_blurProgram->SetUniform("transform", glm::scale(glm::mat4(1.0f), glm::vec3(2.0f)));
+    m_plane->Draw(m_blurProgram.get());
+
     // blit framebuffer
     Framebuffer::BindToDefault();        // default framebuffer 바인딩
     glViewport(0, 0, m_width, m_height); // 원래 viewport 크기로 설정
@@ -320,10 +352,20 @@ void Context::Render()
     m_deferGeoFramebuffer->GetColorAttachment(1)->Bind(); // normal
     glActiveTexture(GL_TEXTURE2);
     m_deferGeoFramebuffer->GetColorAttachment(2)->Bind(); // albedo
+
+    // use ssao
+    glActiveTexture(GL_TEXTURE3);
+    m_ssaoBlurFramebuffer->GetColorAttachment()->Bind(); // ssao blur framebuffer
+
     glActiveTexture(GL_TEXTURE0);
     m_deferLightProgram->SetUniform("gPosition", 0);
     m_deferLightProgram->SetUniform("gNormal", 1);
     m_deferLightProgram->SetUniform("gAlbedoSpec", 2);
+
+    // ssao blur framebuffer & ssao 사용 여부
+    m_deferLightProgram->SetUniform("ssao", 3);
+    m_deferLightProgram->SetUniform("useSsao", (m_useSsao ? 1 : 0)); // ssao 사용 여부
+
     for (size_t i = 0; i < m_deferLights.size(); i++)
     {
         auto posName = fmt::format("lights[{}].position", i);
@@ -575,9 +617,10 @@ bool Context::Init()
         m_deferLights[i].position = glm::vec3(RandomRange(-10.0f, 10.0f),
                                               RandomRange(1.0f, 4.0f),
                                               RandomRange(-10.0f, 10.0f));
-        m_deferLights[i].color = glm::vec3(RandomRange(0.05f, 0.3f),
-                                           RandomRange(0.05f, 0.3f),
-                                           RandomRange(0.05f, 0.3f));
+        m_deferLights[i].color = glm::vec3(
+            RandomRange(0.0f, i < 3 ? 1.0f : 0.0f),
+            RandomRange(0.0f, i < 3 ? 1.0f : 0.0f),
+            RandomRange(0.0f, i < 3 ? 1.0f : 0.0f)); // 효과 확인을 위해
     }
 
     // ssao program
@@ -632,6 +675,14 @@ bool Context::Init()
         float scale = (1.0f - t2) * 0.1f + t2 * 1.0f;
 
         m_ssaoSamples[i] = sample * scale;
+    }
+
+    // init ssao blur
+    m_blurProgram = Program::Create("./shader/blur_5x5.vs", "./shader/blur_5x5.fs");
+    if (!m_blurProgram)
+    {
+        SPDLOG_ERROR("blur program init failed");
+        return false;
     }
 
     return true;

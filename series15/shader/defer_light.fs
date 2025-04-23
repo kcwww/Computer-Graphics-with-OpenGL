@@ -5,6 +5,7 @@ in vec2 texCoord;
 uniform sampler2D gPosition;
 uniform sampler2D gNormal;
 uniform sampler2D gAlbedoSpec;
+
 uniform sampler2D ssao;
 uniform int useSsao;
 

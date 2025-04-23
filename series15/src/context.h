@@ -136,6 +136,11 @@ private:
 
     std::vector<glm::vec3> m_ssaoSamples;
     float m_ssaoRadius{1.0f};
+
+    // ssao blur program
+    ProgramUPtr m_blurProgram;
+    FramebufferUPtr m_ssaoBlurFramebuffer;
+    bool m_useSsao{true};
 };
 
 #endif // __CONTEXT_H__
