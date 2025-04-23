@@ -162,6 +162,7 @@ void Context::Render()
             // blinn check
             ImGui::Checkbox("l.blinn", &m_blinn);
             ImGui::Checkbox("l.directional", &m_light.directional);
+            ImGui::DragFloat("ssao radius", &m_ssaoRadius, 0.01f, 0.0f, 5.0f);
         }
 
         if (ImGui::CollapsingHeader("material", ImGuiTreeNodeFlags_DefaultOpen))
@@ -271,11 +272,32 @@ void Context::Render()
     m_deferGeoFramebuffer->GetColorAttachment(0)->Bind(); // position
     glActiveTexture(GL_TEXTURE1);
     m_deferGeoFramebuffer->GetColorAttachment(1)->Bind(); // normal
+
+    // ssao noise texture
+    glActiveTexture(GL_TEXTURE2);
+    m_ssaoNoiseTexture->Bind(); // ssao noise texture
+
     glActiveTexture(GL_TEXTURE0);
     m_ssaoProgram->SetUniform("gPosition", 0);
     m_ssaoProgram->SetUniform("gNormal", 1);
+
+    // ssao noise texture
+    m_ssaoProgram->SetUniform("texNoise", 2);
+    m_ssaoProgram->SetUniform("noiseScale", glm::vec2(
+                                                (float)m_width / (float)m_ssaoNoiseTexture->GetWidth(),
+                                                (float)m_height / (float)m_ssaoNoiseTexture->GetHeight())); // ssao noise texture 크기 설정
+
+    // ssao sample kernel
+    m_ssaoProgram->SetUniform("radius", m_ssaoRadius);
+    for (size_t i = 0; i < m_ssaoSamples.size(); i++)
+    {
+        auto sampleName = fmt::format("samples[{}]", i);
+        m_ssaoProgram->SetUniform(sampleName, m_ssaoSamples[i]);
+    }
+
     m_ssaoProgram->SetUniform("transform", glm::scale(glm::mat4(1.0f), glm::vec3(2.0f)));
     m_ssaoProgram->SetUniform("view", view);
+    m_ssaoProgram->SetUniform("projection", projection);
     m_plane->Draw(m_ssaoProgram.get());
 
     // blit framebuffer
@@ -568,6 +590,49 @@ bool Context::Init()
     // test model
     m_model = Model::Load("./model/backpack.obj");
 
+    // ssao noise texture
+    std::vector<glm::vec3> ssaoNoise;
+    ssaoNoise.resize(16);
+    for (size_t i = 0; i < ssaoNoise.size(); i++)
+    {
+        // randomly selected tangent direction
+        glm::vec3 sample(RandomRange(-1.0f, 1.0f),
+                         RandomRange(-1.0f, 1.0f),
+                         0.0f);
+        ssaoNoise[i] = sample;
+    }
+
+    m_ssaoNoiseTexture = Texture::Create(4, 4, GL_RGB16F, GL_FLOAT);
+    m_ssaoNoiseTexture->Bind();
+    m_ssaoNoiseTexture->SetFilter(GL_NEAREST, GL_NEAREST);
+    m_ssaoNoiseTexture->SetWrap(GL_REPEAT, GL_REPEAT);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 4, 4, GL_RGB, GL_FLOAT, ssaoNoise.data());
+    if (!m_ssaoNoiseTexture)
+    {
+        SPDLOG_ERROR("ssao noise texture init failed");
+        return false;
+    }
     SPDLOG_INFO("context init success");
+
+    // init ssao sample kernel
+    m_ssaoSamples.resize(64);
+    for (size_t i = 0; i < m_ssaoSamples.size(); i++)
+    {
+        // uniformly randomized point in unit hemisphere
+        glm::vec3 sample(
+            RandomRange(-1.0f, 1.0f),
+            RandomRange(-1.0f, 1.0f),
+            RandomRange(0.0f, 1.0f));
+
+        sample = glm::normalize(sample) * RandomRange();
+
+        // scale for slightly shift to center
+        float t = (float)i / (float)m_ssaoSamples.size();
+        float t2 = t * t;
+        float scale = (1.0f - t2) * 0.1f + t2 * 1.0f;
+
+        m_ssaoSamples[i] = sample * scale;
+    }
+
     return true;
 }
