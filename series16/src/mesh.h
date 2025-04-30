@@ -46,6 +46,11 @@ public:
     // plane mesh 생성
     static MeshUPtr CreatePlane();
 
+    // sphere mesh 생성
+    static MeshUPtr CreateSphere(
+        uint32_t latiSegmentCount = 16,
+        uint32_t longiSegmentCount = 32);
+
     // VAO, VBO, IBO 생성 후 바인딩
     const VertexLayout *GetVertexLayout() const { return m_vertexLayout.get(); }
     BufferPtr GetVertexBuffer() const { return m_vertexBuffer; }
