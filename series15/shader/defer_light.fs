@@ -6,8 +6,8 @@ uniform sampler2D gPosition;
 uniform sampler2D gNormal;
 uniform sampler2D gAlbedoSpec;
 
-uniform sampler2D ssao;
-uniform int useSsao;
+uniform sampler2D ssao; // ssao texture
+uniform int useSsao; // 0: no SSAO, 1: SSAO
 
 struct Light {
     vec3 position;
