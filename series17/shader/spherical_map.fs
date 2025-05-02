@@ -5,7 +5,7 @@ uniform sampler2D tex;
 
 const vec2 invPi = vec2(0.1591549, 0.3183098862);
 vec2 SampleSphericalMap(vec3 v) {
-  return vec2(atan(v.z, v.x), asin(v.y)) * invPi + 0.5;
+  return vec2(atan(v.z, v.x), asin(v.y)) * invPi + 0.5; // u, v 값 계산
 }
 
 void main() {

@@ -36,6 +36,10 @@ private:
     MeshUPtr m_plane;
     MeshUPtr m_sphere;
 
+    // spherical map
+    TextureUPtr m_hdrMap;
+    ProgramUPtr m_sphericalMapProgram;
+
     struct Light
     {
         glm::vec3 position{glm::vec3(0.0f, 0.0f, 0.0f)};
@@ -45,14 +49,9 @@ private:
 
     struct Material
     {
-        // glm::vec3 albedo{glm::vec3(1.0f, 1.0f, 1.0f)};
-        // float roughness{0.5f};
-        // float metallic{0.5f};
-
-        TexturePtr albedo;
-        TexturePtr roughness;
-        TexturePtr metallic;
-        TexturePtr normal;
+        glm::vec3 albedo{glm::vec3(1.0f, 1.0f, 1.0f)};
+        float roughness{0.5f};
+        float metallic{0.5f};
         float ao{0.1f};
     };
     Material m_material;
