@@ -79,6 +79,27 @@ void Texture::SetTextureFromImage(const Image *image)
     m_height = image->GetHeight();
     m_format = format;
     m_type = GL_UNSIGNED_BYTE;
+    if (image->GetBytePerChannel() == 4)
+    { // hdr 확장자 로드, 채널이 4개인 경우 float 타입 로드 및 GL_RGB16F 포맷 사용
+        m_type = GL_FLOAT;
+        switch (image->GetChannelCount())
+        {
+        default:
+            break;
+        case 1:
+            m_format = GL_R16F;
+            break;
+        case 2:
+            m_format = GL_RG16F;
+            break;
+        case 3:
+            m_format = GL_RGB16F;
+            break;
+        case 4:
+            m_format = GL_RGBA16F;
+            break;
+        }
+    }
 
     glTexImage2D(GL_TEXTURE_2D, 0, m_format,
                  m_width, m_height, 0,
