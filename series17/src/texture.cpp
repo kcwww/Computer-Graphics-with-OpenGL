@@ -1,5 +1,34 @@
 #include "texture.h"
 
+static GLenum GetImageFormat(uint32_t internalFormat)
+{
+    GLenum imageFormat = GL_RGBA;
+    if (internalFormat == GL_DEPTH_COMPONENT)
+    {
+        imageFormat = GL_DEPTH_COMPONENT;
+    }
+    else if (internalFormat == GL_RGB ||
+             internalFormat == GL_RGB16F ||
+             internalFormat == GL_RGB32F)
+    {
+        imageFormat = GL_RGB;
+    }
+    else if (internalFormat == GL_RG ||
+             internalFormat == GL_RG16F ||
+             internalFormat == GL_RG32F)
+    {
+        imageFormat = GL_RG;
+    }
+    else if (internalFormat == GL_RED ||
+             internalFormat == GL_R ||
+             internalFormat == GL_R16F ||
+             internalFormat == GL_R32F)
+    {
+        imageFormat = GL_RED;
+    }
+    return imageFormat;
+}
+
 TextureUPtr Texture::Create(int width, int height, uint32_t format, uint32_t type)
 {
     auto texture = TextureUPtr(new Texture());
@@ -185,35 +214,6 @@ bool CubeTexture::InitFromImages(const std::vector<Image *> &images)
     }
 
     return true;
-}
-
-static GLenum GetImageFormat(uint32_t internalFormat)
-{
-    GLenum imageFormat = GL_RGBA;
-    if (internalFormat == GL_DEPTH_COMPONENT)
-    {
-        imageFormat = GL_DEPTH_COMPONENT;
-    }
-    else if (internalFormat == GL_RGB ||
-             internalFormat == GL_RGB16F ||
-             internalFormat == GL_RGB32F)
-    {
-        imageFormat = GL_RGB;
-    }
-    else if (internalFormat == GL_RG ||
-             internalFormat == GL_RG16F ||
-             internalFormat == GL_RG32F)
-    {
-        imageFormat = GL_RG;
-    }
-    else if (internalFormat == GL_RED ||
-             internalFormat == GL_R ||
-             internalFormat == GL_R16F ||
-             internalFormat == GL_R32F)
-    {
-        imageFormat = GL_RED;
-    }
-    return imageFormat;
 }
 
 CubeTextureUPtr CubeTexture::Create(int width, int height,
