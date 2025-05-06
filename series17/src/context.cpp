@@ -178,6 +178,16 @@ void Context::Render()
     m_sphericalMapProgram->SetUniform("tex", 0);
     m_hdrMap->Bind();
     m_box->Draw(m_sphericalMapProgram.get());
+
+    // skybox
+    glDepthFunc(GL_LEQUAL);
+    m_skyboxProgram->Use();
+    m_skyboxProgram->SetUniform("projection", projection);
+    m_skyboxProgram->SetUniform("view", view);
+    m_skyboxProgram->SetUniform("cubeMap", 0);
+    m_hdrCubeMap->Bind();
+    m_box->Draw(m_skyboxProgram.get());
+    glDepthFunc(GL_LESS);
 }
 
 bool Context::Init()
@@ -212,5 +222,42 @@ bool Context::Init()
         "./shader/spherical_map.vs", "./shader/spherical_map.fs");
     if (!m_sphericalMapProgram)
         return false;
+
+    m_hdrCubeMap = CubeTexture::Create(512, 512, GL_RGB16F, GL_FLOAT);
+    auto cubeFramebuffer = CubeFramebuffer::Create(m_hdrCubeMap);
+    auto projection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
+    std::vector<glm::mat4> views = {
+        glm::lookAt(glm::vec3(0.0f),
+                    glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)),
+        glm::lookAt(glm::vec3(0.0f),
+                    glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)),
+        glm::lookAt(glm::vec3(0.0f),
+                    glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)),
+        glm::lookAt(glm::vec3(0.0f),
+                    glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)),
+        glm::lookAt(glm::vec3(0.0f),
+                    glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)),
+        glm::lookAt(glm::vec3(0.0f),
+                    glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f)),
+    };
+    m_sphericalMapProgram->Use();
+    m_sphericalMapProgram->SetUniform("tex", 0);
+    m_hdrMap->Bind();
+    glViewport(0, 0, 512, 512);
+    for (int i = 0; i < (int)views.size(); i++)
+    {
+        cubeFramebuffer->Bind(i);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        m_sphericalMapProgram->SetUniform("transform", projection * views[i]);
+        m_box->Draw(m_sphericalMapProgram.get());
+    }
+
+    Framebuffer::BindToDefault();
+    glViewport(0, 0, m_width, m_height);
+
+    m_skyboxProgram = Program::Create("./shader/skybox_hdr.vs", "./shader/skybox_hdr.fs");
+    if (!m_skyboxProgram)
+        return false;
+
     return true;
 }

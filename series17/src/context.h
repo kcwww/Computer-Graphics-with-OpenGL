@@ -40,6 +40,11 @@ private:
     TextureUPtr m_hdrMap;
     ProgramUPtr m_sphericalMapProgram;
 
+    // cubemap texture
+    CubeTexturePtr m_hdrCubeMap;
+    // skybox program
+    ProgramUPtr m_skyboxProgram;
+
     struct Light
     {
         glm::vec3 position{glm::vec3(0.0f, 0.0f, 0.0f)};
