@@ -24,6 +24,13 @@ uniform Material material;
 
 const float PI = 3.14159265359;
 
+uniform samplerCube irradianceMap;
+uniform int useIrradiance;
+
+vec3 FresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness) {
+    return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(1.0 - cosTheta, 5.0);
+}
+
 float DistributionGGX(vec3 normal, vec3 halfDir, float roughness) {
   float a = roughness * roughness;
   float a2 = a * a;
@@ -98,6 +105,16 @@ void main() {
   }
 
   vec3 ambient = vec3(0.03) * albedo * ao;
+
+  // diffuse irradiance map
+  if (useIrradiance == 1) {
+    vec3 kS = FresnelSchlickRoughness(dotNV, F0, roughness);
+    vec3 kD = 1.0 - kS;
+    vec3 irradiance = texture(irradianceMap, fragNormal).rgb;
+    vec3 diffuse = irradiance * albedo;
+    ambient = (kD * diffuse) * ao;
+  }
+
   vec3 color = ambient + outRadiance;
 
   // Reinhard tone mapping + gamma correction

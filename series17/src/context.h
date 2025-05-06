@@ -45,6 +45,10 @@ private:
     // skybox program
     ProgramUPtr m_skyboxProgram;
 
+    // diffuse irradiance map
+    CubeTexturePtr m_diffuseIrradianceMap;
+    ProgramUPtr m_diffuseIrradianceProgram;
+
     struct Light
     {
         glm::vec3 position{glm::vec3(0.0f, 0.0f, 0.0f)};
@@ -60,6 +64,9 @@ private:
         float ao{0.1f};
     };
     Material m_material;
+
+    // useDiffuseIrradiance
+    bool m_useDiffuseIrradiance{true};
 
     int m_width = {640};
     int m_height = {480};

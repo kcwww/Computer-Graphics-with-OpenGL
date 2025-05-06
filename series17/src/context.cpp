@@ -135,6 +135,7 @@ void Context::Render()
             ImGui::SliderFloat("mat.metallic", &m_material.metallic, 0.0f, 1.0f);
             ImGui::SliderFloat("mat.ao", &m_material.ao, 0.0f, 1.0f);
         }
+        ImGui::Checkbox("use diffuse irradiance", &m_useDiffuseIrradiance);
     }
     ImGui::End();
 
@@ -160,6 +161,11 @@ void Context::Render()
     m_pbrProgram->SetUniform("material.ao", m_material.ao);
     m_pbrProgram->SetUniform("material.albedo", m_material.albedo);
 
+    // useDiffuseIrradiance
+    m_pbrProgram->SetUniform("useIrradiance", m_useDiffuseIrradiance ? 1 : 0);
+    m_pbrProgram->SetUniform("irradianceMap", 0);
+    m_diffuseIrradianceMap->Bind();
+
     for (size_t i = 0; i < m_lights.size(); i++)
     {
         auto posName = fmt::format("lights[{}].position", i);
@@ -169,15 +175,6 @@ void Context::Render()
     }
 
     DrawScene(view, projection, m_pbrProgram.get());
-
-    // spherical map
-    m_sphericalMapProgram->Use();
-    m_sphericalMapProgram->SetUniform("transform",
-                                      projection * view *
-                                          glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 2.0f))); // z축 2만큼 이동
-    m_sphericalMapProgram->SetUniform("tex", 0);
-    m_hdrMap->Bind();
-    m_box->Draw(m_sphericalMapProgram.get());
 
     // skybox
     glDepthFunc(GL_LEQUAL);
@@ -252,12 +249,35 @@ bool Context::Init()
         m_box->Draw(m_sphericalMapProgram.get());
     }
 
-    Framebuffer::BindToDefault();
-    glViewport(0, 0, m_width, m_height);
-
     m_skyboxProgram = Program::Create("./shader/skybox_hdr.vs", "./shader/skybox_hdr.fs");
     if (!m_skyboxProgram)
         return false;
+
+    // diffuse irradiance map
+    m_diffuseIrradianceProgram = Program::Create(
+        "./shader/skybox_hdr.vs", "./shader/diffuse_irradiance.fs");
+    if (!m_diffuseIrradianceProgram)
+        return false;
+    m_diffuseIrradianceMap = CubeTexture::Create(64, 64, GL_RGB16F, GL_FLOAT);
+    cubeFramebuffer = CubeFramebuffer::Create(m_diffuseIrradianceMap);
+    glDepthFunc(GL_LEQUAL);
+    m_diffuseIrradianceProgram->Use();
+    m_diffuseIrradianceProgram->SetUniform("projection", projection);
+    m_diffuseIrradianceProgram->SetUniform("cubeMap", 0);
+    m_hdrCubeMap->Bind();
+    glViewport(0, 0, 64, 64);
+    for (int i = 0; i < (int)views.size(); i++)
+    {
+        cubeFramebuffer->Bind(i);
+        glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        m_diffuseIrradianceProgram->SetUniform("view", views[i]);
+        m_box->Draw(m_diffuseIrradianceProgram.get());
+    }
+    glDepthFunc(GL_LESS);
+
+    Framebuffer::BindToDefault();
+    glViewport(0, 0, m_width, m_height);
 
     return true;
 }
