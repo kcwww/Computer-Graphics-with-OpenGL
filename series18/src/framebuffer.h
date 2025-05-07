@@ -29,7 +29,7 @@ CLASS_PTR(CubeFramebuffer);
 class CubeFramebuffer
 {
 public:
-  static CubeFramebufferUPtr Create(const CubeTexturePtr colorAttachment);
+  static CubeFramebufferUPtr Create(const CubeTexturePtr colorAttachment, uint32_t mipLevel = 0); // mip level을 받는 생성자
   ~CubeFramebuffer();
 
   const uint32_t Get() const { return m_framebuffer; }
@@ -38,11 +38,13 @@ public:
 
 private:
   CubeFramebuffer() {}
-  bool InitWithColorAttachment(const CubeTexturePtr &colorAttachment);
+  bool InitWithColorAttachment(const CubeTexturePtr &colorAttachment, uint32_t mipLevel); // mip level을 받아 초기화
 
   uint32_t m_framebuffer{0};
   uint32_t m_depthStencilBuffer{0};
   CubeTexturePtr m_colorAttachment;
+  // mip level
+  uint32_t m_mipLevel{0};
 };
 
 #endif // __FRAMEBUFFER_H__
