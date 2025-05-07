@@ -44,5 +44,6 @@ $ ./빌드디렉터리/프로젝트이름
 | [series14](https://www.chanwooyam.dev/series/computer-graphics/F5biIb2Dfq733w70u0g7) | Deferred shading  |
 | [series15](https://www.chanwooyam.dev/series/computer-graphics/ojmFQrHGDTUaZxy9CxX2) | SSAO  |
 | [series16](https://www.chanwooyam.dev/series/computer-graphics/mwnkKt7DyqIOeVTa3KxS) | PBR (Physics-Based Rendering)  |
-| [series17](https://www.chanwooyam.dev/series/computer-graphics/NFbQflTVCUzJaVLh4lwO) | IBL (Image Based Lighting) |
+| [series17](https://www.chanwooyam.dev/series/computer-graphics/NFbQflTVCUzJaVLh4lwO) | IBL (Image Based Lighting) Diffuse irradiance |
+| [series18](https://www.chanwooyam.dev/series/computer-graphics/2VR2jEbO6xzCuBp8YlIV) | IBL (Image Based Lighting) Specular |
 
