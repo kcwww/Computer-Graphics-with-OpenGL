@@ -196,6 +196,9 @@ bool Context::Init()
     glEnable(GL_MULTISAMPLE); // MSAA
 
     glEnable(GL_DEPTH_TEST);
+
+    // 경계 텍스쳐 문제 해결
+    glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
     m_box = Mesh::CreateBox();
