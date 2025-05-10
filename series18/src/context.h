@@ -53,6 +53,10 @@ private:
     CubeTexturePtr m_preFilteredMap;
     ProgramUPtr m_preFilteredProgram;
 
+    // brdf lookup texture
+    TexturePtr m_brdfLookupMap;
+    ProgramUPtr m_brdfLookupProgram;
+
     struct Light
     {
         glm::vec3 position{glm::vec3(0.0f, 0.0f, 0.0f)};
@@ -70,7 +74,7 @@ private:
     Material m_material;
 
     // useDiffuseIrradiance
-    bool m_useDiffuseIrradiance{true};
+    bool m_useIBL{true};
 
     int m_width = {640};
     int m_height = {480};

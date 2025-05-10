@@ -135,7 +135,10 @@ void Context::Render()
             ImGui::SliderFloat("mat.metallic", &m_material.metallic, 0.0f, 1.0f);
             ImGui::SliderFloat("mat.ao", &m_material.ao, 0.0f, 1.0f);
         }
-        ImGui::Checkbox("use diffuse irradiance", &m_useDiffuseIrradiance);
+        // ImGui::Checkbox("use irradiance", &m_useDiffuseIrradiance);
+        ImGui::Checkbox("use IBL", &m_useIBL);
+        float w = ImGui::GetContentRegionAvailWidth();
+        ImGui::Image((ImTextureID)m_brdfLookupMap->Get(), ImVec2(w, w));
     }
     ImGui::End();
 
@@ -161,10 +164,24 @@ void Context::Render()
     m_pbrProgram->SetUniform("material.ao", m_material.ao);
     m_pbrProgram->SetUniform("material.albedo", m_material.albedo);
 
-    // useDiffuseIrradiance
-    m_pbrProgram->SetUniform("useIrradiance", m_useDiffuseIrradiance ? 1 : 0);
+    // // useDiffuseIrradiance
+    // m_pbrProgram->SetUniform("useIrradiance", m_useDiffuseIrradiance ? 1 : 0);
+    // m_pbrProgram->SetUniform("irradianceMap", 0);
+    // m_diffuseIrradianceMap->Bind();
+
+    // useIBL
+    // IBL specular + diffuse
+    m_pbrProgram->SetUniform("useIBL", m_useIBL ? 1 : 0);
     m_pbrProgram->SetUniform("irradianceMap", 0);
+    m_pbrProgram->SetUniform("preFilteredMap", 1);
+    m_pbrProgram->SetUniform("brdfLookupTable", 2);
+    glActiveTexture(GL_TEXTURE0);
     m_diffuseIrradianceMap->Bind();
+    glActiveTexture(GL_TEXTURE1);
+    m_preFilteredMap->Bind();
+    glActiveTexture(GL_TEXTURE2);
+    m_brdfLookupMap->Bind();
+    glActiveTexture(GL_TEXTURE0);
 
     for (size_t i = 0; i < m_lights.size(); i++)
     {
@@ -182,11 +199,11 @@ void Context::Render()
     m_skyboxProgram->SetUniform("projection", projection);
     m_skyboxProgram->SetUniform("view", view);
     m_skyboxProgram->SetUniform("cubeMap", 0);
-    m_skyboxProgram->SetUniform("roughness", m_material.roughness); // 임시 추가
-    // m_hdrCubeMap->Bind();
+    // m_skyboxProgram->SetUniform("roughness", m_material.roughness); // 임시 추가
+    m_hdrCubeMap->Bind();
 
     // prefiltered environment map
-    m_preFilteredMap->Bind();
+    // m_preFilteredMap->Bind(); // 임시 추가
     m_box->Draw(m_skyboxProgram.get());
     glDepthFunc(GL_LESS);
 }
@@ -255,6 +272,7 @@ bool Context::Init()
         m_sphericalMapProgram->SetUniform("transform", projection * views[i]);
         m_box->Draw(m_sphericalMapProgram.get());
     }
+    m_hdrCubeMap->GenerateMipmap();
 
     m_skyboxProgram = Program::Create("./shader/skybox_hdr.vs", "./shader/skybox_hdr.fs");
     if (!m_skyboxProgram)
@@ -312,6 +330,17 @@ bool Context::Init()
         }
     }
     glDepthFunc(GL_LESS);
+
+    m_brdfLookupProgram = Program::Create("./shader/brdf_lookup.vs", "./shader/brdf_lookup.fs");
+    m_brdfLookupMap = Texture::Create(512, 512, GL_RG16F, GL_FLOAT);
+    auto lookupFramebuffer = Framebuffer::Create({m_brdfLookupMap});
+    lookupFramebuffer->Bind();
+    glViewport(0, 0, 512, 512);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    m_brdfLookupProgram->Use();
+    m_brdfLookupProgram->SetUniform("transform",
+                                    glm::scale(glm::mat4(1.0f), glm::vec3(2.0f, -2.0f, 2.0f)));
+    m_plane->Draw(m_brdfLookupProgram.get());
 
     Framebuffer::BindToDefault();
     glViewport(0, 0, m_width, m_height);
