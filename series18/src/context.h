@@ -49,6 +49,10 @@ private:
     CubeTexturePtr m_diffuseIrradianceMap;
     ProgramUPtr m_diffuseIrradianceProgram;
 
+    // prefiltered environment map
+    CubeTexturePtr m_preFilteredMap;
+    ProgramUPtr m_preFilteredProgram;
+
     struct Light
     {
         glm::vec3 position{glm::vec3(0.0f, 0.0f, 0.0f)};
